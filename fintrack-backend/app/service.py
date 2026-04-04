@@ -1,26 +1,27 @@
 #from .models import User
 from .schemas import UserCreate, AccountCreate
-from sqlmodel import Session
+from sqlmodel import Session, SQLModel
 from .models import User, Account
-class UserService:
-    def __init__(self, session: Session):
-        self.session = session
+from typing import Generic, TypeVar, Type
+T = TypeVar("T", bound=SQLModel)
 
-    def create_user(self, user_data = UserCreate):
-        new_user = User(**user_data.model_dump())
-        self.session.add(new_user)
-        self.session.commit()
-        self.session.refresh(new_user)
-        return new_user
-    
-class AccountService:
-    def __init__(self, session: Session):
+class Service(Generic[T]):
+    def __init__(self, session: Session, model: Type[T]):
         self.session = session
+        self.model = model
 
-    def create_account(self, account_data = AccountCreate):
-        new_account = Account(**account_data.model_dump())
-        self.session.add(new_account)
+    def create(self, data):
+        db_obj = self.model(**data.model_dump())
+        self.session.add(db_obj)
         self.session.commit()
-        self.session.refresh(new_account)
-        return new_account
-    
+        self.session.refresh(db_obj)
+        return db_obj
+
+
+class UserService(Service[User]):
+    def __init__(self, session: Session):
+        super().__init__(session, User)
+
+class AccountService(Service[Account]):
+    def __init__(self, session: Session):
+        super().__init__(session, Account)

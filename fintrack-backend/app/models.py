@@ -5,4 +5,9 @@ class User(SQLModel, table=True):
     name: str = Field(index = True)
     email: str
     password: str
+
+class Account(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(index = True)
+    balance: int
     

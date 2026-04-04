@@ -8,3 +8,10 @@ class UserCreate(UserBase):
     name: str
     email: str
     password: str
+
+class AccountBase(BaseModel):
+    name: str | None = None
+    balance: int | None = None
+class AccountCreate(AccountBase):
+    name: str
+    balance: int

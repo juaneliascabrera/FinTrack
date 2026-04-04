@@ -2,6 +2,13 @@ import pytest
 from app.schemas import UserCreate, AccountCreate
 from app.service import UserService, AccountService
 from sqlalchemy.exc import IntegrityError
+from sqlmodel import Session, select, func
+from app.models import User
+def users_amount(session: Session):
+    #Usamos la función count de SQL
+    consulta = select(func.count()).select_from(User)
+    cantidad = session.exec(consulta).one()
+    return cantidad
 def get_new_user():
     return UserCreate(name = "Juan", email = "test1@ejemplo.com", password = "123")
 
@@ -15,6 +22,7 @@ def test_can_create_user(session):
     
     created_user = service.create(new_user)
 
+    session.
     assert created_user.id is not None
     assert created_user.email == "test1@ejemplo.com"
 
@@ -69,3 +77,32 @@ def test_creating_account_with_invalid_user_id_raises_integrity_error(session):
     #Post-asserts
     assert len(created_user.accounts) == 0
     
+#Testing cascade/restrict. 
+#I will allow user deleting if and only if all his accounts have no balance.
+
+def test_can_delete_user_if_has_no_accounts_with_balance(session):
+    account_service = AccountService(session)
+    user_service = UserService(session)    
+
+    new_user = get_new_user()
+    created_user = user_service.create(new_user)
+    
+    new_account = get_new_account_with_1000_balance(user_id = created_user.id)
+    created_account = account_service.create(new_account)
+
+    #Assert user and account exists
+    assert 
+
+def test_can_not_delete_user_if_has_accounts_with_balance(session):
+    account_service = AccountService(session)
+    user_service = UserService(session)    
+
+    new_user = get_new_user()
+    created_user = user_service.create(new_user)
+    
+    new_account = get_new_account_with_1000_balance(user_id = created_user.id)
+    created_account = account_service.create(new_account)
+    #Pre-assert
+    assert created_account.balance == 1000
+    #Try to delete
+        

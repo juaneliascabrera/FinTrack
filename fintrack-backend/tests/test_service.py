@@ -1,7 +1,7 @@
 import pytest
 from app.schemas import UserCreate, AccountCreate
 from app.service import UserService, AccountService
-
+from sqlalchemy.exc import IntegrityError
 def get_new_user():
     return UserCreate(name = "Juan", email = "test1@ejemplo.com", password = "123")
 
@@ -52,4 +52,20 @@ def test_an_user_can_add_an_account(session):
     assert created_account.name == "MercadoPago"
     assert created_account.balance == 1000
 
+def test_creating_account_with_invalid_user_id_raises_integrity_error(session):
+    account_service = AccountService(session)
+    user_service = UserService(session)    
 
+    new_user = get_new_user()
+    created_user = user_service.create(new_user)
+
+    #Pre-asserts
+    assert len(created_user.accounts) == 0
+    new_account = get_new_account_with_1000_balance(user_id = 999)
+
+    with pytest.raises(IntegrityError):
+        created_account = account_service.create(new_account)
+    session.rollback()
+    #Post-asserts
+    assert len(created_user.accounts) == 0
+    

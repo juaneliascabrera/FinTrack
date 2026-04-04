@@ -1,8 +1,15 @@
 import pytest
 from sqlmodel import SQLModel, Session, create_engine
 from sqlalchemy.pool import StaticPool
+from sqlalchemy.engine import Engine
+from sqlalchemy import event
 from app.main import app
 
+@event.listens_for(Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 @pytest.fixture(name="session")
 def session_fixture():

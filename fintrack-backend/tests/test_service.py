@@ -1,10 +1,17 @@
 import pytest
 from app.schemas import UserCreate, AccountCreate
 from app.service import UserService, AccountService
+
+def get_new_user():
+    return UserCreate(name = "Juan", email = "test1@ejemplo.com", password = "123")
+
+def get_new_account_with_1000_balance(user_id: int):
+    return AccountCreate(name = "MercadoPago", balance = 1000, user_id = user_id)
+
 def test_can_create_user(session):
 
     service = UserService(session)
-    new_user = UserCreate(name = "Juan", email = "test1@ejemplo.com", password = "123")
+    new_user = get_new_user()
     
     created_user = service.create(new_user)
 
@@ -12,11 +19,37 @@ def test_can_create_user(session):
     assert created_user.email == "test1@ejemplo.com"
 
 def test_can_create_account(session):
-    service = AccountService(session)
-    new_account = AccountCreate(name = "MercadoPago", balance = 1000)
+    account_service = AccountService(session)
+    user_service = UserService(session)    
+
+    new_user = get_new_user()
+    created_user = user_service.create(new_user)
     
-    created_account = service.create(new_account)
+    new_account = get_new_account_with_1000_balance(user_id = created_user.id)
+
+    created_account = account_service.create(new_account)
 
     assert created_account.id is not None
     assert created_account.name == "MercadoPago"
     assert created_account.balance == 1000
+
+def test_an_user_can_add_an_account(session):
+    #Prepare
+    user_service = UserService(session)
+    account_service = AccountService(session)
+
+    new_user = get_new_user()
+    created_user = user_service.create(new_user)
+    #Pre-asserts
+    assert len(created_user.accounts) == 0
+
+    new_account = get_new_account_with_1000_balance(user_id = created_user.id)
+    created_account = account_service.create(new_account)
+
+    #Post-asserts
+    assert len(created_user.accounts) == 1
+    assert created_account.user_id == created_user.id
+    assert created_account.name == "MercadoPago"
+    assert created_account.balance == 1000
+
+

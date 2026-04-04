@@ -15,3 +15,4 @@ class AccountBase(BaseModel):
 class AccountCreate(AccountBase):
     name: str
     balance: int
+    user_id: int

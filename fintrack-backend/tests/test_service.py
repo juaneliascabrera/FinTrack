@@ -1,15 +1,14 @@
 import pytest
 from app.schemas import UserCreate
+from app.service import UserService
+def test_can_create_user(session):
 
-def test_can_create_user(service, db_fake):
-    new_user = UserCreate(name = "Juan")
-    #DB Length
-    db_len_0 = len(db_fake)
+    service = UserService(session)
+    new_user = UserCreate(name = "Juan", email = "test1@ejemplo.com", password = "123")
     
-    #Create the user with service
-    res = service.create_user(new_user)
-    #Asserts
-    assert len(db_fake) == db_len_0 + 1
-    assert res["id"] == 3
-    assert res["name"] == "Juan"
-    assert not res["accounts"]
+    created_user = service.create_user(new_user)
+
+    assert created_user.id is not None
+    assert created_user.email == "test1@ejemplo.com"
+
+#def test_can_create_account(service, db_users_fake):

@@ -1,14 +1,15 @@
 #from .models import User
 from .schemas import UserCreate
-
+from sqlmodel import Session
+from .models import User
 class UserService:
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, session: Session):
+        self.session = session
 
     def create_user(self, user_data = UserCreate):
-        id = max(self.db.keys() or [0]) + 1
-        new_user = user_data.model_dump(exclude_unset=True)
-        new_user["id"] = id
-        new_user["accounts"] = []
-        self.db[id] = new_user
+        new_user = User(**user_data.model_dump())
+        self.session.add(new_user)
+        self.session.commit()
+        self.session.refresh(new_user)
         return new_user
+    

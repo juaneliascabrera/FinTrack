@@ -6,6 +6,7 @@ ENV/
 bin/
 lib/
 develop-eggs/
+uv.lock
 eggs/
 dist/
 build/

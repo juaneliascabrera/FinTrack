@@ -1,0 +1,65 @@
+# --- Entorno Virtual ---
+.venv/
+venv/
+env/
+ENV/
+bin/
+lib/
+develop-eggs/
+eggs/
+dist/
+build/
+
+# --- Python (Caché y Compilados) ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# --- Variables de Entorno y Secretos (CRÍTICO) ---
+# Nunca, nunca subas tu archivo .env al repo
+.env
+.env.*
+!.env.example
+secrets.json
+
+# --- Base de Datos (Si usas archivos locales) ---
+*.db
+*.sqlite3
+
+# --- Docker ---
+# Si mapeás datos de Postgres a una carpeta local en lugar de volúmenes:
+# postgres_data/
+.docker/
+
+# --- IDEs y Editores ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# --- Testing y Reportes ---
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# --- Sistema Operativo ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+

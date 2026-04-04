@@ -3,26 +3,37 @@ from app.schemas import UserCreate, AccountCreate
 from app.service import UserService, AccountService
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select, func
-from app.models import User
+from app.models import User, Account
+from app.exceptions import CannotDeleteUserWithBalance
 def users_amount(session: Session):
     #Usamos la función count de SQL
     consulta = select(func.count()).select_from(User)
     cantidad = session.exec(consulta).one()
     return cantidad
+
+def accounts_amount(session: Session):
+    #Usamos la función count de SQL
+    consulta = select(func.count()).select_from(Account)
+    cantidad = session.exec(consulta).one()
+    return cantidad
+
 def get_new_user():
     return UserCreate(name = "Juan", email = "test1@ejemplo.com", password = "123")
 
 def get_new_account_with_1000_balance(user_id: int):
     return AccountCreate(name = "MercadoPago", balance = 1000, user_id = user_id)
 
+def get_new_account_with_0_balance(user_id: int):
+    return AccountCreate(name = "MercadoPago", balance = 0, user_id = user_id)
+
 def test_can_create_user(session):
 
     service = UserService(session)
     new_user = get_new_user()
-    
+    assert users_amount(session) == 0
     created_user = service.create(new_user)
 
-    session.
+    assert users_amount(session) == 1
     assert created_user.id is not None
     assert created_user.email == "test1@ejemplo.com"
 
@@ -87,11 +98,19 @@ def test_can_delete_user_if_has_no_accounts_with_balance(session):
     new_user = get_new_user()
     created_user = user_service.create(new_user)
     
-    new_account = get_new_account_with_1000_balance(user_id = created_user.id)
+    new_account = get_new_account_with_0_balance(user_id = created_user.id)
     created_account = account_service.create(new_account)
 
     #Assert user and account exists
-    assert 
+    assert users_amount(session) == 1
+    assert accounts_amount(session) == 1
+
+    #Deleting
+    user_service.delete(created_user.id)
+
+    #Assert user and account doesn't exist anymore.
+    assert users_amount(session) == 0
+    assert accounts_amount(session) == 0
 
 def test_can_not_delete_user_if_has_accounts_with_balance(session):
     account_service = AccountService(session)
@@ -105,4 +124,9 @@ def test_can_not_delete_user_if_has_accounts_with_balance(session):
     #Pre-assert
     assert created_account.balance == 1000
     #Try to delete
-        
+    with pytest.raises(CannotDeleteUserWithBalance):
+        user_service.delete(created_user.id)
+    #Post assert
+    assert users_amount(session) == 1
+    assert accounts_amount(session) == 1
+    assert created_account.balance == 1000

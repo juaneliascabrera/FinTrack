@@ -2,8 +2,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr
 
 class UserBase(BaseModel):
     name: str | None = None
-    email: EmailStr | None = None
-    password: str | None = None
+    
 class UserCreate(UserBase):
     name: str
     email: EmailStr
@@ -32,4 +31,3 @@ class AccountCreate(AccountBase):
 
 class AccountUpdate(AccountBase):
     name: str | None = None
-        

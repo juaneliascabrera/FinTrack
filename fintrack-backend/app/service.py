@@ -27,6 +27,9 @@ class Service(Generic[T]):
         
         return db_obj
     
+    def get_by_id(self, id: int):
+        return self.session.get(self.model, id)
+
     def delete(self, obj_id):
         raise NotImplementedError("Subclass responsibility")
 
@@ -46,6 +49,23 @@ class UserService(Service[User]):
         except Exception:
             self.session.rollback()
         return True
+    
+    def update(self, user_id, data):
+        db_user = self.get_by_id(user_id)
+        if not db_user:
+            return None
+        update_data = data.model_dump(exclude_unset=True)
+        for llave, valor in update_data.items():
+            setattr(db_user, llave, valor)
+
+        self.session.add(db_user)
+        try:
+            self.session.commit()
+            self.session.refresh(db_user)
+        except Exception as exc:
+            self.rollback()
+            raise exc
+        return db_user
 
 class AccountService(Service[Account]):
     def __init__(self, session: Session):

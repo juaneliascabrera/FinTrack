@@ -1,13 +1,17 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 class UserBase(BaseModel):
     name: str | None = None
-    email: str | None = None
+    email: EmailStr | None = None
     password: str | None = None
 class UserCreate(UserBase):
     name: str
-    email: str
+    email: EmailStr
     password: str
+
+class UserPublic(UserBase):
+    name: str
+    email: EmailStr
 
 class AccountBase(BaseModel):
     name: str | None = None

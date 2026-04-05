@@ -13,6 +13,10 @@ class UserPublic(UserBase):
     name: str
     email: EmailStr
 
+class UserUpdate(UserBase):
+    name: str | None = None
+    password: str | None = None
+
 class AccountBase(BaseModel):
     name: str | None = None
     balance: int | None = None
@@ -25,3 +29,7 @@ class AccountCreate(AccountBase):
     name: str
     balance: int
     user_id: int
+
+class AccountUpdate(AccountBase):
+    name: str | None = None
+        

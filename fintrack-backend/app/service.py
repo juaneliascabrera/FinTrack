@@ -63,7 +63,7 @@ class UserService(Service[User]):
             self.session.commit()
             self.session.refresh(db_user)
         except Exception as exc:
-            self.rollback()
+            self.session.rollback()
             raise exc
         return db_user
 

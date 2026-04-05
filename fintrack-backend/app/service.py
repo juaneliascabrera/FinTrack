@@ -1,6 +1,6 @@
 #from .models import User
 from .schemas import UserCreate, AccountCreate
-from sqlmodel import Session, SQLModel
+from sqlmodel import Session, SQLModel, select
 from .models import User, Account
 from .exceptions import NotExistsError, CannotDeleteUserWithAccounts
 from typing import Generic, TypeVar, Type
@@ -10,6 +10,10 @@ class Service(Generic[T]):
     def __init__(self, session: Session, model: Type[T]):
         self.session = session
         self.model = model
+
+    def list_all(self):
+        instruction = select(self.model)
+        return self.session.exec(instruction).all()
 
     def create(self, data):
         db_obj = self.model(**data.model_dump())

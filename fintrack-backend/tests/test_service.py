@@ -52,6 +52,13 @@ def test_can_create_account(session):
     assert created_account.name == "MercadoPago"
     assert created_account.balance == 1000
 
+def test_list_all_works(session):
+    user_service = UserService(session)    
+    assert len(user_service.list_all()) == 0
+    new_user = get_new_user()
+    created_user = user_service.create(new_user)
+
+    assert len(user_service.list_all()) == 1
 def test_an_user_can_add_an_account(session):
     #Prepare
     user_service = UserService(session)

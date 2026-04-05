@@ -16,6 +16,11 @@ class UserPublic(UserBase):
 class AccountBase(BaseModel):
     name: str | None = None
     balance: int | None = None
+
+class AccountPublic(AccountBase):
+    name: str
+    balance: int
+
 class AccountCreate(AccountBase):
     name: str
     balance: int

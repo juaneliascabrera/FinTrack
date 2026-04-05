@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, Response, Request
 from fastapi.responses import JSONResponse
 from .service import UserService, AccountService
 from sqlmodel import Session
-from .schemas import UserCreate, UserPublic, UserUpdate
+from .schemas import *
 from .database import get_session, create_db_and_tables
 from .exceptions import *
 from contextlib import asynccontextmanager
@@ -24,6 +24,12 @@ async def delete_conflict_exception_handler(request: Request, exc: CannotDeleteU
     return JSONResponse(
         status_code=409,
         content={"detail": "Can't delete user because it has active accounts."}
+    )
+@app.exception_handler(CannotDeleteAccountWithBalance)
+async def delete_conflict_exception_handler(request: Request, exc: CannotDeleteAccountWithBalance):
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "Can't delete account because it has balance."}
     )
 
 # -- Services --
@@ -59,3 +65,25 @@ def delete_user(user_id: int, service: UserService = Depends(get_user_service)):
     return Response(status_code = 204)
     
     
+# Account endpoints
+@app.post("/accounts", response_model=AccountPublic, status_code=201)
+def create_account(data: AccountCreate, service: AccountService = Depends(get_account_service)):
+    return service.create(data)
+
+@app.get("/accounts", response_model=list[AccountPublic])
+def list_accounts(
+    service: AccountService = Depends(get_account_service)
+):
+    return service.list_all()
+
+@app.patch("/accounts/{account_id}", response_model=AccountPublic)
+def update_account(account_id: int, data: AccountUpdate, service: AccountService = Depends(get_account_service)):
+    updated_account = service.update(account_id, data)
+    if not updated_account:
+        raise HTTPException(status_code=404, detail="Account Not Found")
+    return updated_account
+
+@app.delete("/accounts/{account_id}", status_code = status.HTTP_204_NO_CONTENT)
+def delete_account(account_id: int, service: AccountService = Depends(get_account_service)):
+    service.delete(account_id)
+    return Response(status_code = 204)

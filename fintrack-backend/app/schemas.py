@@ -19,10 +19,10 @@ class UserUpdate(UserBase):
 class AccountBase(BaseModel):
     name: str | None = None
     
-
 class AccountPublic(AccountBase):
     name: str
     balance: int
+    user_id: int
 
 class AccountCreate(AccountBase):
     name: str

@@ -17,7 +17,7 @@ def test_can_not_change_user_email(session, default_user):
 
     assert created_user.email == "test1@ejemplo.com"
 
-def test_can_not_change_acconut_balance(session, default_user, account_factory):    
+def test_can_not_change_account_balance(session, default_user, account_factory):    
     user_service = UserService(session)
     account_service = AccountService(session)
     created_user = user_service.create(default_user)

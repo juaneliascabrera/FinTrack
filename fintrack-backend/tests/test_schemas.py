@@ -24,9 +24,9 @@ def test_can_not_change_account_balance(session, default_user, account_factory):
     new_account = account_factory(user_id = created_user.id, balance = 500)
 
     created_account = account_service.create(new_account)
-    assert created_user.email == "test1@ejemplo.com"
+    assert created_account.balance == 500
     with pytest.raises(ValidationError):
-        updated_user = UserUpdate(email = "test2@ejemplo.com")
-        user_service.update(1, updated_user)
+        updated_account = AccountUpdate(balance = 10000)
+        account_service.update(1, updated_account)
 
-    assert created_user.email == "test1@ejemplo.com"
+    assert created_account.balance == 500

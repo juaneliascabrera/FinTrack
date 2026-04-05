@@ -18,7 +18,7 @@ class UserUpdate(UserBase):
     model_config = ConfigDict(extra='forbid')
 class AccountBase(BaseModel):
     name: str | None = None
-    balance: int | None = None
+    
 
 class AccountPublic(AccountBase):
     name: str
@@ -31,3 +31,4 @@ class AccountCreate(AccountBase):
 
 class AccountUpdate(AccountBase):
     name: str | None = None
+    model_config = ConfigDict(extra='forbid')

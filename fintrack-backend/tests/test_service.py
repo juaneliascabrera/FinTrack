@@ -4,7 +4,7 @@ from app.service import UserService, AccountService
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select, func
 from app.models import User, Account
-from app.exceptions import CannotDeleteUserWithAccounts
+from app.exceptions import CannotDeleteUserWithAccounts, CannotDeleteAccountWithBalance
 def users_amount(session: Session):
     #Usamos la función count de SQL
     consulta = select(func.count()).select_from(User)
@@ -133,3 +133,37 @@ def test_can_not_delete_user_if_has_accounts(session, default_user, account_fact
     assert users_amount(session) == 1
     assert accounts_amount(session) == 1
     assert created_account.balance == 1000
+
+def test_can_delete_account_if_it_has_no_balance(session, default_user, account_factory):
+    account_service = AccountService(session)
+    user_service = UserService(session)
+
+    created_user = user_service.create(default_user)
+    new_account = account_factory(user_id = created_user.id, balance = 0)
+    created_account = account_service.create(new_account)
+    #Assert
+    assert created_account is not None
+    assert created_account.balance == 0
+    #Try
+    account_service.delete(created_account.id)
+    #Assert
+    assert accounts_amount(session) == 0
+
+def test_can_not_delete_account_if_it_has_balance(session, default_user, account_factory):
+    account_service = AccountService(session)
+    user_service = UserService(session)
+
+    created_user = user_service.create(default_user)
+    new_account = account_factory(user_id = created_user.id, balance = 1000)
+    created_account = account_service.create(new_account)
+    #Assert
+    assert created_account is not None
+    assert created_account.balance == 1000
+    #Try
+    with pytest.raises(CannotDeleteAccountWithBalance):
+        account_service.delete(created_account.id)
+    #Assert
+    assert accounts_amount(session) == 1
+
+
+   

@@ -3,3 +3,6 @@ class NotExistsError(Exception):
 
 class CannotDeleteUserWithAccounts(Exception):
     pass
+
+class CannotDeleteAccountWithBalance(Exception):
+    pass

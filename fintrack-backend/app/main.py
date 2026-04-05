@@ -1,8 +1,10 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status, Response, Request 
+from fastapi.responses import JSONResponse
 from .service import UserService, AccountService
 from sqlmodel import Session
 from .schemas import UserCreate, UserPublic, UserUpdate
 from .database import get_session, create_db_and_tables
+from .exceptions import *
 from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -10,6 +12,19 @@ async def lifespan(app: FastAPI):
     yield
 app = FastAPI(lifespan=lifespan)
 
+# Exception handler
+@app.exception_handler(NotExistsError)
+async def not_exists_exception_handler(request: Request, exc: NotExistsError):
+    return JSONResponse(
+        status_code=404,
+        content={"detail": "The solicited resource does not exists"}
+    )
+@app.exception_handler(CannotDeleteUserWithAccounts)
+async def delete_conflict_exception_handler(request: Request, exc: CannotDeleteUserWithAccounts):
+    return JSONResponse(
+        status_code=409,
+        content={"detail": "Can't delete user because it has active accounts."}
+    )
 
 # -- Services --
 
@@ -37,3 +52,10 @@ def update_user(user_id: int, data: UserUpdate, service: UserService = Depends(g
     if not updated_user:
         raise HTTPException(status_code=404, detail="User Not Found")
     return updated_user
+
+@app.delete("/users/{user_id}", status_code = status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int, service: UserService = Depends(get_user_service)):
+    service.delete(user_id)
+    return Response(status_code = 204)
+    
+    

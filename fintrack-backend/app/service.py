@@ -14,8 +14,13 @@ class Service(Generic[T]):
     def create(self, data):
         db_obj = self.model(**data.model_dump())
         self.session.add(db_obj)
-        self.session.commit()
-        self.session.refresh(db_obj)
+        try:
+            self.session.commit()
+            self.session.refresh(db_obj)
+        except Exception as exc:
+            self.session.rollback()
+            raise exc
+        
         return db_obj
     
     def delete(self, obj_id):
@@ -32,7 +37,10 @@ class UserService(Service[User]):
         if user_obj.accounts:
             raise CannotDeleteUserWithAccounts
         self.session.delete(user_obj)
-        self.session.commit()
+        try:
+            self.session.commit()
+        except Exception:
+            self.session.rollback()
         return True
 
 class AccountService(Service[Account]):

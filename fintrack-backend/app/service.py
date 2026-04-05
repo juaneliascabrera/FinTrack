@@ -2,7 +2,7 @@
 from .schemas import UserCreate, AccountCreate
 from sqlmodel import Session, SQLModel
 from .models import User, Account
-from .exceptions import NotExistsError, CannotDeleteUserWithBalance
+from .exceptions import NotExistsError, CannotDeleteUserWithAccounts
 from typing import Generic, TypeVar, Type
 T = TypeVar("T", bound=SQLModel)
 
@@ -29,12 +29,8 @@ class UserService(Service[User]):
         user_obj = self.session.get(self.model, user_id)
         if not user_obj:
             raise NotExistsError
-        
-        for account in user_obj.accounts:
-            if account.balance != 0:
-                raise CannotDeleteUserWithBalance
-            else:
-                self.session.delete(account)
+        if user_obj.accounts:
+            raise CannotDeleteUserWithAccounts
         self.session.delete(user_obj)
         self.session.commit()
         return True

@@ -1,5 +1,5 @@
-class NotExistsError(BaseException):
+class NotExistsError(Exception):
     pass
 
-class CannotDeleteUserWithBalance(Exception):
+class CannotDeleteUserWithAccounts(Exception):
     pass

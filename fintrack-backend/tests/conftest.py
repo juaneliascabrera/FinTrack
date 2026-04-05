@@ -4,7 +4,7 @@ from sqlalchemy.pool import StaticPool
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
 from app.main import app
-
+from app.schemas import *
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
@@ -29,3 +29,14 @@ def session_fixture():
         yield session # El test usa la sesión aquí
         
     # 4. Al terminar el test, las tablas desaparecen de la RAM
+
+@pytest.fixture
+def default_user():
+    return UserCreate(name = "Juan", email = "test1@ejemplo.com", password = "123")
+
+@pytest.fixture
+def account_factory():
+    def _make_account(user_id: int, balance: int = 1000):
+        return AccountCreate(name = "MercadoPago", balance = balance, user_id = user_id)
+    return _make_account
+

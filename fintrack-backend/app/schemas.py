@@ -15,7 +15,7 @@ class UserPublic(UserBase):
 class UserUpdate(UserBase):
     name: str | None = None
     password: str | None = None
-
+    model_config = ConfigDict(extra='forbid')
 class AccountBase(BaseModel):
     name: str | None = None
     balance: int | None = None

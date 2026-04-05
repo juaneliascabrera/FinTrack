@@ -17,30 +17,19 @@ def accounts_amount(session: Session):
     cantidad = session.exec(consulta).one()
     return cantidad
 
-def get_new_user():
-    return UserCreate(name = "Juan", email = "test1@ejemplo.com", password = "123")
-
-def get_new_account_with_1000_balance(user_id: int):
-    return AccountCreate(name = "MercadoPago", balance = 1000, user_id = user_id)
-
-def get_new_account_with_0_balance(user_id: int):
-    return AccountCreate(name = "MercadoPago", balance = 0, user_id = user_id)
-
-def test_can_create_user(session):
+def test_can_create_user(session, default_user):
 
     service = UserService(session)
-    new_user = get_new_user()
     assert users_amount(session) == 0
-    created_user = service.create(new_user)
+    created_user = service.create(default_user)
 
     assert users_amount(session) == 1
     assert created_user.id is not None
     assert created_user.email == "test1@ejemplo.com"
 
-def test_can_change_user_name(session):
+def test_can_change_user_name(session, default_user):
     service = UserService(session)
-    new_user = get_new_user()
-    created_user = service.create(new_user)
+    created_user = service.create(default_user)
 
     assert created_user.name == "Juan"
     updated_user = UserUpdate(name = "Elias")
@@ -48,10 +37,9 @@ def test_can_change_user_name(session):
     #Now assert name has changed
     assert created_user.name == "Elias"
 
-def test_can_change_user_password(session):
+def test_can_change_user_password(session, default_user):
     service = UserService(session)
-    new_user = get_new_user()
-    created_user = service.create(new_user)
+    created_user = service.create(default_user)
 
     assert created_user.password == "123"
     updated_user = UserUpdate(password = "321")
@@ -59,39 +47,36 @@ def test_can_change_user_password(session):
     #Now assert password has changed
     assert created_user.password == "321"
 
-def test_can_create_account(session):
+def test_can_create_account(session, default_user, account_factory):
     account_service = AccountService(session)
     user_service = UserService(session)    
 
-    new_user = get_new_user()
-    created_user = user_service.create(new_user)
+    created_user = user_service.create(default_user)
     
-    new_account = get_new_account_with_1000_balance(user_id = created_user.id)
+    new_account = account_factory(user_id = created_user.id, balance = 500)
 
     created_account = account_service.create(new_account)
 
     assert created_account.id is not None
     assert created_account.name == "MercadoPago"
-    assert created_account.balance == 1000
+    assert created_account.balance == 500
 
-def test_list_all_works(session):
+def test_list_all_works(session, default_user):
     user_service = UserService(session)    
     assert len(user_service.list_all()) == 0
-    new_user = get_new_user()
-    created_user = user_service.create(new_user)
+    created_user = user_service.create(default_user)
 
     assert len(user_service.list_all()) == 1
-def test_an_user_can_add_an_account(session):
+def test_an_user_can_add_an_account(session, default_user, account_factory):
     #Prepare
     user_service = UserService(session)
     account_service = AccountService(session)
 
-    new_user = get_new_user()
-    created_user = user_service.create(new_user)
+    created_user = user_service.create(default_user)
     #Pre-asserts
     assert len(created_user.accounts) == 0
 
-    new_account = get_new_account_with_1000_balance(user_id = created_user.id)
+    new_account = account_factory(user_id = created_user.id, balance = 1000)
     created_account = account_service.create(new_account)
 
     #Post-asserts
@@ -100,16 +85,15 @@ def test_an_user_can_add_an_account(session):
     assert created_account.name == "MercadoPago"
     assert created_account.balance == 1000
 
-def test_creating_account_with_invalid_user_id_raises_integrity_error(session):
+def test_creating_account_with_invalid_user_id_raises_integrity_error(session, default_user, account_factory):
     account_service = AccountService(session)
     user_service = UserService(session)    
 
-    new_user = get_new_user()
-    created_user = user_service.create(new_user)
+    created_user = user_service.create(default_user)
 
     #Pre-asserts
     assert len(created_user.accounts) == 0
-    new_account = get_new_account_with_1000_balance(user_id = 999)
+    new_account = account_factory(user_id = 999, balance = 1000)
 
     with pytest.raises(IntegrityError):
         created_account = account_service.create(new_account)
@@ -117,15 +101,11 @@ def test_creating_account_with_invalid_user_id_raises_integrity_error(session):
     #Post-asserts
     assert len(created_user.accounts) == 0
     
-#Testing cascade/restrict. 
-#I will allow user deleting if and only if all his accounts have no balance.
-
-def test_can_delete_user_if_has_no_accounts(session):
+def test_can_delete_user_if_has_no_accounts(session, default_user):
     account_service = AccountService(session)
     user_service = UserService(session)    
 
-    new_user = get_new_user()
-    created_user = user_service.create(new_user)
+    created_user = user_service.create(default_user)
 
     #Assert user exists
     assert users_amount(session) == 1
@@ -136,14 +116,13 @@ def test_can_delete_user_if_has_no_accounts(session):
     #Assert user doesn't exists anymore.
     assert users_amount(session) == 0
 
-def test_can_not_delete_user_if_has_accounts(session):
+def test_can_not_delete_user_if_has_accounts(session, default_user, account_factory):
     account_service = AccountService(session)
     user_service = UserService(session)    
 
-    new_user = get_new_user()
-    created_user = user_service.create(new_user)
+    created_user = user_service.create(default_user)
     
-    new_account = get_new_account_with_1000_balance(user_id = created_user.id)
+    new_account = account_factory(user_id = created_user.id, balance = 1000)
     created_account = account_service.create(new_account)
     #Pre-assert
     assert created_account.balance == 1000

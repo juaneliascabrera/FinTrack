@@ -1,13 +1,13 @@
 from fastapi import FastAPI, Depends, HTTPException
-from .service import UserService
-#from .schemas import UserCreate, UserPublic, UserUpdate
+from .service import UserService, AccountService
+from sqlmodel import Session
+from .schemas import UserCreate
 
 app = FastAPI()
 
+def get_user_service(session: Session = Depends(get_session)):
+    return UserService(session)
 
+def get_account_service(session: Session = Depends(get_session)):
+    return AccountService(session)
 
-def get_user_service():
-    pass
-#@app.post("/users", response_model = UserPublic, status_code=201)
-#def create_user(data: UserCreate, service: UserService = Depends(get_user_service)):
- #   return service.create_user(data)

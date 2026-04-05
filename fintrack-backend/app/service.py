@@ -71,4 +71,4 @@ class AccountService(Service[Account]):
     def __init__(self, session: Session):
         super().__init__(session, Account)
 
-    
+    #def delete(self, account_id):

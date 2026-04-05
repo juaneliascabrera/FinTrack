@@ -1,5 +1,5 @@
 import pytest
-from app.schemas import UserCreate, AccountCreate
+from app.schemas import UserCreate, AccountCreate, UserUpdate, AccountUpdate
 from app.service import UserService, AccountService
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select, func
@@ -36,6 +36,28 @@ def test_can_create_user(session):
     assert users_amount(session) == 1
     assert created_user.id is not None
     assert created_user.email == "test1@ejemplo.com"
+
+def test_can_change_user_name(session):
+    service = UserService(session)
+    new_user = get_new_user()
+    created_user = service.create(new_user)
+
+    assert created_user.name == "Juan"
+    updated_user = UserUpdate(name = "Elias")
+    service.update(1, updated_user)
+    #Now assert name has changed
+    assert created_user.name == "Elias"
+
+def test_can_change_user_password(session):
+    service = UserService(session)
+    new_user = get_new_user()
+    created_user = service.create(new_user)
+
+    assert created_user.password == "123"
+    updated_user = UserUpdate(password = "321")
+    service.update(1, updated_user)
+    #Now assert password has changed
+    assert created_user.password == "321"
 
 def test_can_create_account(session):
     account_service = AccountService(session)

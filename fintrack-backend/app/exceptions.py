@@ -24,3 +24,6 @@ class OnlyTransferCanHaveToAccountId(Exception):
 
 class TransferNeedsDestinationAccount(Exception):
     pass
+
+class InsufficientFunds(Exception):
+    pass

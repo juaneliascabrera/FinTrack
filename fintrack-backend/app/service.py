@@ -9,11 +9,11 @@ from .exceptions import (
     ForbiddenError,
     IncorrectPassword,
     NotExistsError,
+    InsufficientFunds
 )
-from .models import Account, User, Transaction
-from .schemas import AccountCreate, AccountUpdate, UserCreate, UserUpdate
+from .models import Account, Transaction, User, TransactionType
+from .schemas import AccountCreate, AccountUpdate, UserCreate, UserUpdate, TransactionCreate, TransactionPublic
 from .security import get_password_hash, verify_password
-
 T = TypeVar("T", bound=SQLModel)
 
 
@@ -127,6 +127,13 @@ class AccountService(Service[Account]):
             raise ForbiddenError
         return account
 
+    def update_balance(self, account_id: int, amount: float):
+        account = self.get_by_id(account_id)
+        if not account:
+            raise NotExistsError
+        account.balance += amount
+        self.session.add(account)
+        # The TransactionService should make the commit.
     def delete_account_safe(self, account_id, user_id):
         account_obj = self._get_owned_account(account_id, user_id)
         if account_obj.balance != 0:
@@ -144,6 +151,34 @@ class AccountService(Service[Account]):
 
 class TransactionService(Service[Transaction]):
     def __init__(self, session: Session, account_service: AccountService):
-        pass
+        super().__init__(session, Transaction)
+        self.account_service = account_service
 
-    #def create_transaction(self, data, user_id)
+    def create_transaction(self, data: TransactionCreate, user_id: int):
+        source_account = self.account_service.get_by_id(data.source_account)
+        if not source_account or source_account.user_id != user_id:
+            raise ForbiddenError()
+        
+        if data.type == TransactionType.TRANSFER:
+            destination_account = self.account_service.get_by_id(data.destination_account)
+            if not destination_account:
+                raise NotExistsError()
+
+        if data.type == TransactionType.INCOME:
+            # We update our balance
+            self.account_service.update_balance(data.source_account, data.amount)
+        elif data.type == TransactionType.EXPENSE:
+            # First we must check if we have enough balance
+            if source_account.balance < data.amount:
+                raise InsufficientFunds()
+            # We update our balance
+            self.account_service.update_balance(data.source_account, -data.amount)
+            self.account_service.update_balance(data.source_account, -data.amount)
+
+        elif data.type == TransactionType.TRANSFER:
+            if source_account.balance < data.amount:
+                raise InsufficientFunds()
+            self.account_service.update_balance(data.source_account, -data.amount)
+            self.account_service.update_balance(data.destination_account, data.amount)
+        db_transaction = Transaction(**data.model_dump())
+        return self._save(db_transaction)

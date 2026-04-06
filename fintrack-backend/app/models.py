@@ -46,7 +46,10 @@ class Transaction(SQLModel, table=True):
     def validate_transfer_requirements(self) -> "Transaction":
         if self.type == TransactionType.TRANSFER and self.destination_account is None:
             raise TransferNeedsDestinationAccount
-        if self.type != TransactionType.TRANSFER and self.destination_account is not None:
+        if (
+            self.type != TransactionType.TRANSFER
+            and self.destination_account is not None
+        ):
             raise OnlyTransferCanHaveToAccountId
 
         return self

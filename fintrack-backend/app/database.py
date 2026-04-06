@@ -1,12 +1,13 @@
 # ...existing code...
 from sqlmodel import create_engine, SQLModel, Session
 from sqlalchemy.pool import StaticPool
+from .config import settings
 
 # Uso temporal: SQLite en memoria (RAM) para pruebas
-DATABASE_URL = "sqlite:///:memory:"
+
 
 engine = create_engine(
-    DATABASE_URL,
+    settings.DATABASE_URL,
     echo=True,
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,

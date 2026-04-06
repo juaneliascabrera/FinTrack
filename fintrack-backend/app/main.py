@@ -87,3 +87,4 @@ def update_account(account_id: int, data: AccountUpdate, service: AccountService
 def delete_account(account_id: int, service: AccountService = Depends(get_account_service)):
     service.delete(account_id)
     return Response(status_code = 204)
+

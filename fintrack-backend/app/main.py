@@ -43,6 +43,12 @@ async def incorrect_password_exception_handler(request: Request, exc: IncorrectP
         status_code=401,
         content={"detail": "The password is incorrect."}
     )
+@app.exception_handler(ForbiddenError)
+async def forbidden_exception_handler(request: Request, exc: ForbiddenError):
+    return JSONResponse(
+        status_code=403,
+        content={"detail": "Unauthorized."}
+    )
 
 # -- Services --
 
@@ -93,16 +99,17 @@ def list_users(
 ):
     return service.list_all()
 
-@app.patch("/users/{user_id}", response_model=UserPublic)
-def update_user(user_id: int, data: UserUpdate, service: UserService = Depends(get_user_service)):
-    updated_user = service.update(user_id, data)
+@app.patch("/users", response_model=UserPublic)
+def update_user(data: UserUpdate, service: UserService = Depends(get_user_service), 
+current_user: User = Depends(get_current_user)):
+    updated_user = service.update(current_user.id, data)
     if not updated_user:
         raise HTTPException(status_code=404, detail="User Not Found")
     return updated_user
 
-@app.delete("/users/{user_id}", status_code = status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: int, service: UserService = Depends(get_user_service)):
-    service.delete(user_id)
+@app.delete("/users", status_code = status.HTTP_204_NO_CONTENT)
+def delete_user(current_user: User = Depends(get_current_user), service: UserService = Depends(get_user_service)):
+    service.delete_user_safe(current_user.id)
     return Response(status_code = 204)
     
     
@@ -121,13 +128,14 @@ def list_accounts(
     service: AccountService = Depends(get_account_service),
     current_user: User = Depends(get_current_user)
 ):
-    return service.list_all()
+
+    return service.list_accounts_of(current_user.id)
 
 @app.patch("/accounts/{account_id}", response_model=AccountPublic)
 def update_account(account_id: int, data: AccountUpdate, 
 service: AccountService = Depends(get_account_service),
 current_user = Depends(get_current_user)):
-    updated_account = service.update(account_id, data)
+    updated_account = service.update_account_safe(account_id, data, current_user.id)
     if not updated_account:
         raise HTTPException(status_code=404, detail="Account Not Found")
     return updated_account
@@ -135,6 +143,6 @@ current_user = Depends(get_current_user)):
 @app.delete("/accounts/{account_id}", status_code = status.HTTP_204_NO_CONTENT)
 def delete_account(account_id: int, service: AccountService = Depends(get_account_service),
 current_user = Depends(get_current_user)):
-    service.delete(account_id)
+    service.delete_account_safe(account_id, current_user.id)
     return Response(status_code = 204)
 

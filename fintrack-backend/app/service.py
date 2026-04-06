@@ -1,8 +1,8 @@
 #from .models import User
-from .schemas import UserCreate, UserUpdate, AccountCreate
+from .schemas import UserCreate, UserUpdate, AccountCreate, AccountUpdate
 from sqlmodel import Session, SQLModel, select
 from .models import User, Account
-from .exceptions import NotExistsError, CannotDeleteUserWithAccounts, CannotDeleteAccountWithBalance, IncorrectPassword
+from .exceptions import *
 from typing import Generic, TypeVar, Type
 from .security import *
 T = TypeVar("T", bound=SQLModel)
@@ -25,6 +25,11 @@ class Service(Generic[T]):
         instruction = select(self.model)
         return self.session.exec(instruction).all()
 
+    def list_accounts_of(self, user_id: int):
+        instruction = select(Account).where(Account.user_id == user_id)
+        results = self.session.exec(instruction)
+        return results.all()
+
     def create(self, data):
         db_obj = self.model(**data.model_dump())
         return self._save(db_obj)
@@ -32,16 +37,19 @@ class Service(Generic[T]):
     def get_by_id(self, id: int):
         return self.session.get(self.model, id)
 
-    def delete(self, obj_id):
-        raise NotImplementedError("Subclass responsibility")
+    def delete(self, db_obj: T):
+        self.session.delete(db_obj)
+        try:
+            self.session.commit()
+        except Exception as exc:
+            self.session.rollback()
+            raise exc
+        return True
 
-    def update(self, id, data):
-        db_obj = self.get_by_id(id)
-        if not db_obj:
-            return None
+    def update(self, db_obj: T, data):
         update_data = data.model_dump(exclude_unset=True)
-        for llave, valor in update_data.items():
-            setattr(db_obj, llave, valor)
+        for key, value in update_data.items():
+            setattr(db_obj, key, value)
 
         return self._save(db_obj)
 
@@ -69,19 +77,13 @@ class UserService(Service[User]):
         db_user = self.model(**user_data)
         return self._save(db_user)
 
-    def delete(self, user_id):
+    def delete_user_safe(self, user_id):
         user_obj = self.session.get(self.model, user_id)
         if not user_obj:
             raise NotExistsError
         if user_obj.accounts:
             raise CannotDeleteUserWithAccounts
-        self.session.delete(user_obj)
-        try:
-            self.session.commit()
-        except Exception as exc:
-            self.session.rollback()
-            raise exc
-        return True
+        return self.delete(user_obj)
         
     def update(self, user_id: int, data: UserUpdate):
         db_user = self.get_by_id(user_id)
@@ -94,8 +96,8 @@ class UserService(Service[User]):
         if "password" in update_data and update_data["password"]:
             update_data["password"] = get_password_hash(update_data["password"])
             
-        for llave, valor in update_data.items():
-            setattr(db_user, llave, valor)
+        for key, value in update_data.items():
+            setattr(db_user, key, value)
 
         return self._save(db_user)
 
@@ -103,22 +105,27 @@ class AccountService(Service[Account]):
     def __init__(self, session: Session):
         super().__init__(session, Account)
 
-    def delete(self, account_id):
-        account_obj = self.session.get(self.model, account_id)
-        if not account_obj:
+    def _get_owned_account(self, account_id: int, user_id: int):
+        account = self.get_by_id(account_id)
+        if not account:
             raise NotExistsError
+        if account.user_id != user_id:
+            raise ForbiddenError
+        return account
+
+    def delete_account_safe(self, account_id, user_id):
+        account_obj = self._get_owned_account(account_id, user_id)
         if account_obj.balance != 0:
             raise CannotDeleteAccountWithBalance
-        self.session.delete(account_obj)
-        try:
-            self.session.commit()
-        except Exception as exc:
-            self.session.rollback()
-            raise exc
-        return True
+        return self.delete(account_obj)
     
+    def update_account_safe(self, account_id: int, data: AccountUpdate, user_id: int):
+        account_obj = self._get_owned_account(account_id, user_id)    
+        return self.update(account_obj, data)
+        
+
     def create_with_owner(self, account_data: AccountCreate):
         db_account = self.model(**account_data)
-        return self.create(db_account)
+        return self._save(db_account)
 
 

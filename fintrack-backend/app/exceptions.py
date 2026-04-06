@@ -9,3 +9,6 @@ class CannotDeleteAccountWithBalance(Exception):
 
 class IncorrectPassword(Exception):
     pass
+
+class ForbiddenError(Exception):
+    pass

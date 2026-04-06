@@ -143,7 +143,7 @@ class AccountService(Service[Account]):
 
 
 class TransactionService(Service[Transaction]):
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, account_service: AccountService):
         pass
 
-    
+    #def create_transaction(self, data, user_id)

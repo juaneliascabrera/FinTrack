@@ -1,5 +1,5 @@
 #from .models import User
-from .schemas import UserCreate, UserUpdate
+from .schemas import UserCreate, UserUpdate, AccountCreate
 from sqlmodel import Session, SQLModel, select
 from .models import User, Account
 from .exceptions import NotExistsError, CannotDeleteUserWithAccounts, CannotDeleteAccountWithBalance, IncorrectPassword
@@ -117,3 +117,8 @@ class AccountService(Service[Account]):
             raise exc
         return True
     
+    def create_with_owner(self, account_data: AccountCreate):
+        db_account = self.model(**account_data)
+        return self.create(db_account)
+
+

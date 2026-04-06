@@ -27,7 +27,7 @@ class AccountPublic(AccountBase):
 class AccountCreate(AccountBase):
     name: str
     balance: int
-    user_id: int
+    
 
 class AccountUpdate(AccountBase):
     name: str | None = None

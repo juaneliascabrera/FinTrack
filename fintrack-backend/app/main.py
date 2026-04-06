@@ -108,8 +108,13 @@ def delete_user(user_id: int, service: UserService = Depends(get_user_service)):
     
 # Account endpoints
 @app.post("/accounts", response_model=AccountPublic, status_code=201)
-def create_account(data: AccountCreate, service: AccountService = Depends(get_account_service)):
-    return service.create(data)
+def create_account(data: AccountCreate, 
+service: AccountService = Depends(get_account_service),
+current_user = Depends(get_current_user)
+):
+    account_data = data.model_dump()
+    account_data["user_id"] = current_user.id
+    return service.create_with_owner(account_data)
 
 @app.get("/accounts", response_model=list[AccountPublic])
 def list_accounts(
@@ -119,14 +124,17 @@ def list_accounts(
     return service.list_all()
 
 @app.patch("/accounts/{account_id}", response_model=AccountPublic)
-def update_account(account_id: int, data: AccountUpdate, service: AccountService = Depends(get_account_service)):
+def update_account(account_id: int, data: AccountUpdate, 
+service: AccountService = Depends(get_account_service),
+current_user = Depends(get_current_user)):
     updated_account = service.update(account_id, data)
     if not updated_account:
         raise HTTPException(status_code=404, detail="Account Not Found")
     return updated_account
 
 @app.delete("/accounts/{account_id}", status_code = status.HTTP_204_NO_CONTENT)
-def delete_account(account_id: int, service: AccountService = Depends(get_account_service)):
+def delete_account(account_id: int, service: AccountService = Depends(get_account_service),
+current_user = Depends(get_current_user)):
     service.delete(account_id)
     return Response(status_code = 204)
 

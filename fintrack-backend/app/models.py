@@ -1,10 +1,10 @@
-from sqlalchemy.orm import foreign
+from sqlalchemy import Enum
 from datetime import datetime, timezone
 from typing import List
-
+from pydantic import model_validator
 from sqlmodel import Field, Relationship, SQLModel
-
-class TransactionType(Enum):
+from .exceptions import OnlyTransferCanHaveToAccountId, TransferNeedsDestinationAccount 
+class TransactionType(str, Enum):
     INCOME = "income"
     EXPENSE = "expense"
     TRANSFER = "transfer"    
@@ -32,5 +32,13 @@ class Transaction(SQLModel, table=True):
     timestamp: datetime = Field(default_factory=datetime.now(timezone.utc))
     from_account_id: int = Field(foreign_key="account.id", index=True)
     to_account_id: int | None = Field(default=None, foreign_key="account.id", index=True)
-    type: TransactionType
-     
+    type: TransactionType = Field(sa_type=Enum(TransactionType))
+
+    @model_validator(mode="after")
+    def validate_transfer_requirements(self) -> "Transaction":
+        if self.type == TransactionType.TRANSFER and self.to_account_id is None:
+            raise TransferNeedsDestinationAccount
+        if self.type != TransactionType.TRANSFER and self.to_account_id is not None:
+            raise OnlyTransferCanHaveToAccountId
+        
+        return self

@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select, func
 from app.models import User, Account
 from app.exceptions import CannotDeleteUserWithAccounts, CannotDeleteAccountWithBalance
+from app.security import *
 def users_amount(session: Session):
     #Usamos la función count de SQL
     consulta = select(func.count()).select_from(User)
@@ -41,11 +42,11 @@ def test_can_change_user_password(session, default_user):
     service = UserService(session)
     created_user = service.create(default_user)
 
-    assert created_user.password == "123"
+    assert verify_password("123", created_user.password)
     updated_user = UserUpdate(password = "321")
     service.update(1, updated_user)
     #Now assert password has changed
-    assert created_user.password == "321"
+    assert verify_password("321", created_user.password)
 
 def test_can_create_account(session, default_user, account_factory):
     account_service = AccountService(session)

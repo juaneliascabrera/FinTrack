@@ -1,9 +1,10 @@
 #from .models import User
-from .schemas import UserCreate, AccountCreate
+from .schemas import UserCreate, UserUpdate
 from sqlmodel import Session, SQLModel, select
 from .models import User, Account
 from .exceptions import NotExistsError, CannotDeleteUserWithAccounts, CannotDeleteAccountWithBalance
 from typing import Generic, TypeVar, Type
+from .security import *
 T = TypeVar("T", bound=SQLModel)
 
 class Service(Generic[T]):
@@ -11,12 +12,8 @@ class Service(Generic[T]):
         self.session = session
         self.model = model
     # Shared methods
-    def list_all(self):
-        instruction = select(self.model)
-        return self.session.exec(instruction).all()
 
-    def create(self, data):
-        db_obj = self.model(**data.model_dump())
+    def _save(self, db_obj: T):
         self.session.add(db_obj)
         try:
             self.session.commit()
@@ -24,8 +21,14 @@ class Service(Generic[T]):
         except Exception as exc:
             self.session.rollback()
             raise exc
-        
         return db_obj
+    def list_all(self):
+        instruction = select(self.model)
+        return self.session.exec(instruction).all()
+
+    def create(self, data):
+        db_obj = self.model(**data.model_dump())
+        return self._save(db_obj)
     
     def get_by_id(self, id: int):
         return self.session.get(self.model, id)
@@ -41,18 +44,17 @@ class Service(Generic[T]):
         for llave, valor in update_data.items():
             setattr(db_obj, llave, valor)
 
-        self.session.add(db_obj)
-        try:
-            self.session.commit()
-            self.session.refresh(db_obj)
-        except Exception as exc:
-            self.session.rollback()
-            raise exc
-        return db_obj
+        return self._save(db_obj)
 
 class UserService(Service[User]):
     def __init__(self, session: Session):
         super().__init__(session, User)
+
+    def create(self, data: UserCreate):
+        user_data = data.model_dump()
+        user_data["password"] = get_password_hash(user_data["password"])
+        db_user = self.model(**user_data)
+        return self._save(db_user)
 
     def delete(self, user_id):
         user_obj = self.session.get(self.model, user_id)
@@ -68,6 +70,22 @@ class UserService(Service[User]):
             raise exc
         return True
         
+    def update(self, user_id: int, data: UserUpdate):
+        db_user = self.get_by_id(user_id)
+        if not db_user:
+            return None
+        
+        update_data = data.model_dump(exclude_unset=True)
+        
+        # If we have password
+        if "password" in update_data and update_data["password"]:
+            update_data["password"] = get_password_hash(update_data["password"])
+            
+        for llave, valor in update_data.items():
+            setattr(db_user, llave, valor)
+
+        return self._save(db_user)
+
 class AccountService(Service[Account]):
     def __init__(self, session: Session):
         super().__init__(session, Account)

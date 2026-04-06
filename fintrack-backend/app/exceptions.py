@@ -17,8 +17,10 @@ class IncorrectPassword(Exception):
 class ForbiddenError(Exception):
     pass
 
+
 class OnlyTransferCanHaveToAccountId(Exception):
     pass
+
 
 class TransferNeedsDestinationAccount(Exception):
     pass

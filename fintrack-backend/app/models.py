@@ -1,13 +1,18 @@
-from sqlalchemy import Enum
 from datetime import datetime, timezone
 from typing import List
+
 from pydantic import model_validator
+from sqlalchemy import Enum
 from sqlmodel import Field, Relationship, SQLModel
-from .exceptions import OnlyTransferCanHaveToAccountId, TransferNeedsDestinationAccount 
+
+from .exceptions import OnlyTransferCanHaveToAccountId, TransferNeedsDestinationAccount
+
+
 class TransactionType(str, Enum):
     INCOME = "income"
     EXPENSE = "expense"
-    TRANSFER = "transfer"    
+    TRANSFER = "transfer"
+
 
 class Account(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -24,6 +29,7 @@ class User(SQLModel, table=True):
     password: str
     accounts: List[Account] = Relationship(back_populates="user")
 
+
 class Transaction(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     amount: float
@@ -31,7 +37,9 @@ class Transaction(SQLModel, table=True):
     category: str | None = None
     timestamp: datetime = Field(default_factory=datetime.now(timezone.utc))
     from_account_id: int = Field(foreign_key="account.id", index=True)
-    to_account_id: int | None = Field(default=None, foreign_key="account.id", index=True)
+    to_account_id: int | None = Field(
+        default=None, foreign_key="account.id", index=True
+    )
     type: TransactionType = Field(sa_type=Enum(TransactionType))
 
     @model_validator(mode="after")
@@ -40,5 +48,5 @@ class Transaction(SQLModel, table=True):
             raise TransferNeedsDestinationAccount
         if self.type != TransactionType.TRANSFER and self.to_account_id is not None:
             raise OnlyTransferCanHaveToAccountId
-        
+
         return self

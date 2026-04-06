@@ -8,12 +8,20 @@ from .exceptions import (
     CannotDeleteUserWithAccounts,
     ForbiddenError,
     IncorrectPassword,
+    InsufficientFunds,
     NotExistsError,
-    InsufficientFunds
 )
-from .models import Account, Transaction, User, TransactionType
-from .schemas import AccountCreate, AccountUpdate, UserCreate, UserUpdate, TransactionCreate, TransactionPublic
+from .models import Account, Transaction, TransactionType, User
+from .schemas import (
+    AccountCreate,
+    AccountUpdate,
+    TransactionCreate,
+    TransactionPublic,
+    UserCreate,
+    UserUpdate,
+)
 from .security import get_password_hash, verify_password
+
 T = TypeVar("T", bound=SQLModel)
 
 
@@ -134,6 +142,7 @@ class AccountService(Service[Account]):
         account.balance += amount
         self.session.add(account)
         # The TransactionService should make the commit.
+
     def delete_account_safe(self, account_id, user_id):
         account_obj = self._get_owned_account(account_id, user_id)
         if account_obj.balance != 0:
@@ -158,9 +167,11 @@ class TransactionService(Service[Transaction]):
         source_account = self.account_service.get_by_id(data.source_account)
         if not source_account or source_account.user_id != user_id:
             raise ForbiddenError()
-        
+
         if data.type == TransactionType.TRANSFER:
-            destination_account = self.account_service.get_by_id(data.destination_account)
+            destination_account = self.account_service.get_by_id(
+                data.destination_account
+            )
             if not destination_account:
                 raise NotExistsError()
 
@@ -172,7 +183,6 @@ class TransactionService(Service[Transaction]):
             if source_account.balance < data.amount:
                 raise InsufficientFunds()
             # We update our balance
-            self.account_service.update_balance(data.source_account, -data.amount)
             self.account_service.update_balance(data.source_account, -data.amount)
 
         elif data.type == TransactionType.TRANSFER:

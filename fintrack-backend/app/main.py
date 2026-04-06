@@ -11,6 +11,7 @@ from .exceptions import (
     CannotDeleteUserWithAccounts,
     ForbiddenError,
     IncorrectPassword,
+    InsufficientFunds,
     NotExistsError,
 )
 from .models import User
@@ -18,12 +19,14 @@ from .schemas import (
     AccountCreate,
     AccountPublic,
     AccountUpdate,
+    TransactionCreate,
+    TransactionPublic,
     UserCreate,
     UserPublic,
     UserUpdate,
 )
 from .security import create_access_token, decode_access_token
-from .service import AccountService, UserService
+from .service import AccountService, TransactionService, UserService
 
 
 @asynccontextmanager
@@ -79,6 +82,15 @@ async def forbidden_exception_handler(request: Request, exc: ForbiddenError):
     return JSONResponse(status_code=403, content={"detail": "Unauthorized."})
 
 
+@app.exception_handler(InsufficientFunds)
+async def insufficient_funds_exception_handler(
+    request: Request, exc: InsufficientFunds
+):
+    return JSONResponse(
+        status_code=400, content={"detail": "Insufficient funds in the source account."}
+    )
+
+
 # -- Services --
 
 
@@ -88,6 +100,13 @@ def get_user_service(session: Session = Depends(get_session)):
 
 def get_account_service(session: Session = Depends(get_session)):
     return AccountService(session)
+
+
+def get_transaction_service(
+    session: Session = Depends(get_session),
+    account_service: AccountService = Depends(get_account_service),
+):
+    return TransactionService(session, account_service)
 
 
 def get_current_user(
@@ -201,3 +220,12 @@ def delete_account(
 ):
     service.delete_account_safe(account_id, current_user.id)
     return Response(status_code=204)
+
+
+@app.post("/transactions", response_model=TransactionPublic, status_code=201)
+def create_transaction(
+    data: TransactionCreate,
+    service: TransactionService = Depends(get_transaction_service),
+    current_user: User = Depends(get_current_user),
+):
+    return service.create_transaction(data, current_user.id)

@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, model_validator
 
+from .models import TransactionType
+
 
 class UserBase(BaseModel):
     name: str | None = None

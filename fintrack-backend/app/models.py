@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
+from enum import Enum
 from typing import List
 
 from pydantic import model_validator
-from sqlalchemy import Enum
+from sqlalchemy import Enum as SAEnum
 from sqlmodel import Field, Relationship, SQLModel
 
 from .exceptions import OnlyTransferCanHaveToAccountId, TransferNeedsDestinationAccount
@@ -40,7 +41,7 @@ class Transaction(SQLModel, table=True):
     destination_account: int | None = Field(
         default=None, foreign_key="account.id", index=True
     )
-    type: TransactionType = Field(sa_type=Enum(TransactionType))
+    type: TransactionType = Field(sa_type=SAEnum(TransactionType))
 
     @model_validator(mode="after")
     def validate_transfer_requirements(self) -> "Transaction":

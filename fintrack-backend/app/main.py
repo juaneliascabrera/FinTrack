@@ -1,10 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException, status, Response, Request 
+from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 from .service import UserService, AccountService
 from sqlmodel import Session
 from .schemas import *
 from .database import get_session, create_db_and_tables
 from .exceptions import *
+from .security import create_access_token
 from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -32,6 +34,13 @@ async def delete_conflict_exception_handler(request: Request, exc: CannotDeleteA
         content={"detail": "Can't delete account because it has balance."}
     )
 
+@app.exception_handler(IncorrectPassword)
+async def incorrect_password_exception_handler(request: Request, exc: IncorrectPassword):
+    return JSONResponse(
+        status_code=401,
+        content={"detail": "The password is incorrect."}
+    )
+
 # -- Services --
 
 def get_user_service(session: Session = Depends(get_session)):
@@ -39,6 +48,22 @@ def get_user_service(session: Session = Depends(get_session)):
 
 def get_account_service(session: Session = Depends(get_session)):
     return AccountService(session)
+
+# Login
+@app.post("/auth/login")
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    service: UserService = Depends(get_user_service)):
+    # Trying to authenticate
+    user = service.authenticate_user(form_data.username, form_data.password)
+
+    if not user:
+        incorrect_password_exception_handler()
+    # If it was correct
+    access_token = create_access_token(data={"sub": user.email})
+
+    # Returning token
+    return {"access_token": access_token, "token_type": "bearer"}
 
 # User endpoints
 

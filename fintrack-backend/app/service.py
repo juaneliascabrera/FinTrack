@@ -2,7 +2,7 @@
 from .schemas import UserCreate, UserUpdate
 from sqlmodel import Session, SQLModel, select
 from .models import User, Account
-from .exceptions import NotExistsError, CannotDeleteUserWithAccounts, CannotDeleteAccountWithBalance
+from .exceptions import NotExistsError, CannotDeleteUserWithAccounts, CannotDeleteAccountWithBalance, IncorrectPassword
 from typing import Generic, TypeVar, Type
 from .security import *
 T = TypeVar("T", bound=SQLModel)
@@ -12,7 +12,6 @@ class Service(Generic[T]):
         self.session = session
         self.model = model
     # Shared methods
-
     def _save(self, db_obj: T):
         self.session.add(db_obj)
         try:
@@ -49,6 +48,20 @@ class Service(Generic[T]):
 class UserService(Service[User]):
     def __init__(self, session: Session):
         super().__init__(session, User)
+
+    def get_by_email(self, email: str):
+        statement = select(self.model).where(self.model.email == email)
+        return self.session.exec(statement).first()
+
+    def authenticate_user(self, email: str, plain_password: str):
+        #We need to search the user by email
+        user = self.get_by_email(email)
+        if not user:
+            raise NotExistsError
+        if not verify_password(plain_password, user.password):
+            raise IncorrectPassword
+
+        return user
 
     def create(self, data: UserCreate):
         user_data = data.model_dump()

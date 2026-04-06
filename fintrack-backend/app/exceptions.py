@@ -6,3 +6,6 @@ class CannotDeleteUserWithAccounts(Exception):
 
 class CannotDeleteAccountWithBalance(Exception):
     pass
+
+class IncorrectPassword(Exception):
+    pass

@@ -4,7 +4,7 @@ from app.service import UserService, AccountService
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select, func
 from app.models import User, Account
-from app.exceptions import CannotDeleteUserWithAccounts, CannotDeleteAccountWithBalance
+from app.exceptions import CannotDeleteUserWithAccounts, CannotDeleteAccountWithBalance, IncorrectPassword
 from app.security import *
 def users_amount(session: Session):
     #Usamos la función count de SQL
@@ -166,5 +166,21 @@ def test_can_not_delete_account_if_it_has_balance(session, default_user, account
     #Assert
     assert accounts_amount(session) == 1
 
+def test_can_auth_correctly(session, default_user):
+    user_service = UserService(session)
+    created_user = user_service.create(default_user)
+    # pass is 123
 
-   
+    authed_user = user_service.authenticate_user(created_user.email, default_user.password)
+
+    assert authed_user is not None
+
+def test_incorrect_password_raises_exception(session, default_user):
+    user_service = UserService(session)
+    created_user = user_service.create(default_user)
+    # pass is 123
+
+    with pytest.raises(IncorrectPassword):
+        authed_user = user_service.authenticate_user(created_user.email, "incorrect_pw")
+
+    

@@ -10,7 +10,7 @@ from .exceptions import (
     IncorrectPassword,
     NotExistsError,
 )
-from .models import Account, User
+from .models import Account, User, Transaction
 from .schemas import AccountCreate, AccountUpdate, UserCreate, UserUpdate
 from .security import get_password_hash, verify_password
 
@@ -140,3 +140,10 @@ class AccountService(Service[Account]):
     def create_with_owner(self, account_data: AccountCreate):
         db_account = self.model(**account_data)
         return self._save(db_account)
+
+
+class TransactionService(Service[Transaction]):
+    def __init__(self, session: Session):
+        pass
+
+    

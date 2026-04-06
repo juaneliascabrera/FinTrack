@@ -36,17 +36,17 @@ class Transaction(SQLModel, table=True):
     description: str | None = None
     category: str | None = None
     timestamp: datetime = Field(default_factory=datetime.now(timezone.utc))
-    from_account_id: int = Field(foreign_key="account.id", index=True)
-    to_account_id: int | None = Field(
+    source_account: int = Field(foreign_key="account.id", index=True)
+    destination_account: int | None = Field(
         default=None, foreign_key="account.id", index=True
     )
     type: TransactionType = Field(sa_type=Enum(TransactionType))
 
     @model_validator(mode="after")
     def validate_transfer_requirements(self) -> "Transaction":
-        if self.type == TransactionType.TRANSFER and self.to_account_id is None:
+        if self.type == TransactionType.TRANSFER and self.destination_account is None:
             raise TransferNeedsDestinationAccount
-        if self.type != TransactionType.TRANSFER and self.to_account_id is not None:
+        if self.type != TransactionType.TRANSFER and self.destination_account is not None:
             raise OnlyTransferCanHaveToAccountId
 
         return self

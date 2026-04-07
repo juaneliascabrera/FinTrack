@@ -201,6 +201,7 @@ class TransactionService(Service[Transaction]):
         return self._save(db_transaction)
 
     def delete_transaction_safe(self, transaction_id: int, user_id: int):
+        #WE NEED TO UPDATE THE BALANCE!
         transaction_obj = self._get_owned_transaction(transaction_id, user_id)
         if transaction_obj is None:
             raise NotExistsError()

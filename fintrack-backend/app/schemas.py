@@ -40,6 +40,10 @@ class AccountCreate(AccountBase):
     name: str
     balance: int
 
+class AccountCreateTest(AccountBase):
+    name: str
+    balance: int
+    user_id: int
 
 class AccountUpdate(AccountBase):
     name: str | None = None
@@ -76,4 +80,5 @@ class TransactionCreate(TransactionBase):
 
 class TransactionPublic(TransactionBase):
     id: int
+    source_account: int
     timestamp: datetime

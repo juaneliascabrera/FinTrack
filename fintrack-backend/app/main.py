@@ -229,3 +229,13 @@ def create_transaction(
     current_user: User = Depends(get_current_user),
 ):
     return service.create_transaction(data, current_user.id)
+
+
+@app.delete("/transactions/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_transaction(
+    transaction_id: int,
+    service: TransactionService = Depends(get_transaction_service),
+    current_user=Depends(get_current_user),
+):
+    service.delete_transaction_safe(transaction_id, current_user.id)
+    return Response(status_code=204)

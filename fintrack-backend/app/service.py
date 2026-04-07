@@ -16,7 +16,6 @@ from .schemas import (
     AccountCreate,
     AccountUpdate,
     TransactionCreate,
-    TransactionPublic,
     UserCreate,
     UserUpdate,
 )
@@ -163,6 +162,14 @@ class TransactionService(Service[Transaction]):
         super().__init__(session, Transaction)
         self.account_service = account_service
 
+    def _get_owned_transaction(self, account_id: int, user_id: int):
+        transaction = self.get_by_id(account_id)
+        if not transaction:
+            raise NotExistsError
+        if transaction.source_account != user_id:
+            raise ForbiddenError
+        return transaction
+
     def create_transaction(self, data: TransactionCreate, user_id: int):
         source_account = self.account_service.get_by_id(data.source_account)
         if not source_account or source_account.user_id != user_id:
@@ -192,3 +199,9 @@ class TransactionService(Service[Transaction]):
             self.account_service.update_balance(data.destination_account, data.amount)
         db_transaction = Transaction(**data.model_dump())
         return self._save(db_transaction)
+
+    def delete_transaction_safe(self, transaction_id: int, user_id: int):
+        transaction_obj = self._get_owned_transaction(transaction_id, user_id)
+        if transaction_obj is None:
+            raise NotExistsError()
+        return self.delete(transaction_obj)

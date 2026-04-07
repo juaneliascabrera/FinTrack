@@ -130,7 +130,7 @@ def test_can_delete_user_if_has_no_accounts(session, default_user):
     assert users_amount(session) == 1
 
     # Deleting
-    user_service.delete(created_user.id)
+    user_service.delete_user_safe(created_user.id)
 
     # Assert user doesn't exists anymore.
     assert users_amount(session) == 0
@@ -148,7 +148,7 @@ def test_can_not_delete_user_if_has_accounts(session, default_user, account_fact
     assert created_account.balance == 1000
     # Try to delete
     with pytest.raises(CannotDeleteUserWithAccounts):
-        user_service.delete(created_user.id)
+        user_service.delete_user_safe(created_user.id)
     # Post assert
     assert users_amount(session) == 1
     assert accounts_amount(session) == 1
@@ -168,7 +168,7 @@ def test_can_delete_account_if_it_has_no_balance(
     assert created_account is not None
     assert created_account.balance == 0
     # Try
-    account_service.delete(created_account.id)
+    account_service.delete_account_safe(created_account.id, created_user.id)
     # Assert
     assert accounts_amount(session) == 0
 
@@ -187,7 +187,7 @@ def test_can_not_delete_account_if_it_has_balance(
     assert created_account.balance == 1000
     # Try
     with pytest.raises(CannotDeleteAccountWithBalance):
-        account_service.delete(created_account.id)
+        account_service.delete_account_safe(created_account.id, created_user.id)
     # Assert
     assert accounts_amount(session) == 1
 
@@ -210,4 +210,4 @@ def test_incorrect_password_raises_exception(session, default_user):
     # pass is 123
 
     with pytest.raises(IncorrectPassword):
-        authed_user = user_service.authenticate_user(created_user.email, "incorrect_pw")
+        user_service.authenticate_user(created_user.email, "incorrect_pw")

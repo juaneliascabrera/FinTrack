@@ -13,14 +13,14 @@ from sqlmodel import Session, func, select
 
 
 def users_amount(session: Session):
-    # Usamos la función count de SQL
+    # We use the SQL count function
     consulta = select(func.count()).select_from(User)
     cantidad = session.exec(consulta).one()
     return cantidad
 
 
 def accounts_amount(session: Session):
-    # Usamos la función count de SQL
+    # We use the SQL count function
     consulta = select(func.count()).select_from(Account)
     cantidad = session.exec(consulta).one()
     return cantidad
@@ -195,7 +195,7 @@ def test_can_not_delete_account_if_it_has_balance(
 def test_can_auth_correctly(session, default_user):
     user_service = UserService(session)
     created_user = user_service.create(default_user)
-    # pass is 123
+    # Password is 123
 
     authed_user = user_service.authenticate_user(
         created_user.email, default_user.password
@@ -207,7 +207,7 @@ def test_can_auth_correctly(session, default_user):
 def test_incorrect_password_raises_exception(session, default_user):
     user_service = UserService(session)
     created_user = user_service.create(default_user)
-    # pass is 123
+    # Password is 123
 
     with pytest.raises(IncorrectPassword):
         user_service.authenticate_user(created_user.email, "incorrect_pw")

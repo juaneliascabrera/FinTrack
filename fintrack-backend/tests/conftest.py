@@ -15,20 +15,20 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 
 @pytest.fixture(name="session")
 def session_fixture():
-    # 1. Creamos el motor en memoria
-    # El StaticPool es el truco para que SQLite no se "olvide" de los datos
+    # 1. Create the in-memory engine
+    # StaticPool is the trick so SQLite doesn't "forget" the data
     engine = create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
     )
 
-    # 2. Creamos las tablas (User, Account, etc.)
+    # 2. Create the tables (User, Account, etc.)
     SQLModel.metadata.create_all(engine)
 
-    # 3. Abrimos la sesión para el test
+    # 3. Open the session for the test
     with Session(engine) as session:
-        yield session  # El test usa la sesión aquí
+        yield session  # The test uses the session here
 
-    # 4. Al terminar el test, las tablas desaparecen de la RAM
+    # 4. When the test finishes, tables disappear from RAM
 
 
 @pytest.fixture

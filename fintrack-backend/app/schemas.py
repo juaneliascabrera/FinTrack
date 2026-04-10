@@ -16,6 +16,7 @@ class UserCreate(UserBase):
 
 
 class UserPublic(UserBase):
+    id: int
     name: str
     email: EmailStr
 
@@ -31,6 +32,7 @@ class AccountBase(BaseModel):
 
 
 class AccountPublic(AccountBase):
+    id: int
     name: str
     balance: int
     user_id: int

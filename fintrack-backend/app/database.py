@@ -3,7 +3,7 @@ from sqlmodel import Session, SQLModel, create_engine
 
 from .config import settings
 
-# Configuración del motor para PostgreSQL
+# Engine configuration for PostgreSQL
 engine = create_engine(
     settings.DATABASE_URL,
     echo=True,

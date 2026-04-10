@@ -60,6 +60,7 @@ class TransactionBase(BaseModel):
     
 
 class TransactionCreate(TransactionBase):
+    source_account: int
     destination_account: int | None = None
     timestamp: datetime | None = None
     model_config = ConfigDict(extra="forbid")

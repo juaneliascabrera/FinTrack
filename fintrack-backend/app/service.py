@@ -162,11 +162,12 @@ class TransactionService(Service[Transaction]):
         super().__init__(session, Transaction)
         self.account_service = account_service
 
-    def _get_owned_transaction(self, account_id: int, user_id: int):
-        transaction = self.get_by_id(account_id)
+    def _get_owned_transaction(self, transaction_id: int, user_id: int):
+        transaction = self.get_by_id(transaction_id)
         if not transaction:
             raise NotExistsError
-        if transaction.source_account != user_id:
+        source_account = self.account_service.get_by_id(transaction.source_account)
+        if not source_account or source_account.user_id != user_id:
             raise ForbiddenError
         return transaction
 
@@ -201,10 +202,8 @@ class TransactionService(Service[Transaction]):
         return self._save(db_transaction)
 
     def delete_transaction_safe(self, transaction_id: int, user_id: int):
-        transaction = self.get_by_id(transaction_id)
-        source_account = self.account_service.get_by_id(transaction.source_account)
-        if not source_account or source_account.user_id != user_id:
-            raise ForbiddenError()
+        transaction = self._get_owned_transaction(transaction_id, user_id)
+        
         if transaction.type == TransactionType.INCOME:
             # We need to remove money
             self.account_service.update_balance(transaction.source_account, -transaction.amount)
@@ -212,10 +211,7 @@ class TransactionService(Service[Transaction]):
             # We need to add money
             self.account_service.update_balance(transaction.source_account, transaction.amount)
         elif transaction.type == TransactionType.TRANSFER:
-            self.account_service.update_balance(transaction.transaction.source_account, transaction.amount)
+            self.account_service.update_balance(transaction.source_account, transaction.amount)
             self.account_service.update_balance(transaction.destination_account, -transaction.amount)            
         
-        transaction_obj = self._get_owned_transaction(transaction_id, user_id)
-        if transaction_obj is None:
-            raise NotExistsError()
-        return self.delete(transaction_obj)
+        return self.delete(transaction)

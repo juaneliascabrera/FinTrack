@@ -56,12 +56,12 @@ class TransactionBase(BaseModel):
     description: str | None = None
     category: str | None = None
     type: TransactionType
-    source_account: int
-    destination_account: int | None = None
-    timestamp: datetime | None = None
-
+    
+    
 
 class TransactionCreate(TransactionBase):
+    destination_account: int | None = None
+    timestamp: datetime | None = None
     model_config = ConfigDict(extra="forbid")
 
     @model_validator(mode="after")

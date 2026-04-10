@@ -228,6 +228,8 @@ def create_transaction(
     service: TransactionService = Depends(get_transaction_service),
     current_user: User = Depends(get_current_user),
 ):
+    transaction_data = data.model_dump()
+    transaction_data["source_account"] = current_user.id
     return service.create_transaction(data, current_user.id)
 
 

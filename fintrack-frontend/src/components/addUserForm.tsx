@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const AddUserForm = ({ addUser }) => {
     const [userName, setUserName] = useState('');
@@ -20,19 +20,19 @@ const AddUserForm = ({ addUser }) => {
                 type="text"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                placeholder="Name" 
+                placeholder="Name"
             />
             <input
                 type="email"
                 value={userEmail}
                 onChange={(e) => setUserEmail(e.target.value)}
-                placeholder="Email" 
+                placeholder="Email"
             />
             <input
                 type="password"
                 value={userPassword}
                 onChange={(e) => setUserPassword(e.target.value)}
-                placeholder="Password" 
+                placeholder="Password"
             />
             <button type="submit">
                 Add User

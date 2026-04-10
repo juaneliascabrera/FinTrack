@@ -64,3 +64,13 @@ coverage.xml
 ehthumbs.db
 Thumbs.db
 
+
+# --- Node & Frontend ---
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# --- Vite ---
+.eslintcache
+

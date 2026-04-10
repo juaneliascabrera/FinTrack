@@ -72,5 +72,4 @@ dist-ssr/
 *.local
 
 # --- Vite ---
-.eslintcache
-
+.eslintc

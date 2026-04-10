@@ -1,5 +1,5 @@
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -38,6 +38,20 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+# We'll add the origins to avoid CORS.
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173"
+]
+
+app.add_middleware(
+        CORSMiddleware,
+        allow_origins = origins,
+        allow_credentials = True,
+        allow_methods = ["*"],
+        allow_headers = ["*"])
+
 
 
 # Exception handler
@@ -235,7 +249,8 @@ def create_transaction(
 def delete_transaction(
     transaction_id: int,
     service: TransactionService = Depends(get_transaction_service),
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
     service.delete_transaction_safe(transaction_id, current_user.id)
     return Response(status_code=204)
+

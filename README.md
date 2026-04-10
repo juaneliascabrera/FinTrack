@@ -30,13 +30,13 @@ implements:
 
 ## 🛠️ Technologies Used
 
--   **Python 3.13**\
--   **FastAPI**\
--   **SQLModel / SQLAlchemy**\
--   **PostgreSQL**\
--   **Pytest**\
--   **Ruff**\
--   **Uv**\
+-   **Python 3.13**
+-   **FastAPI**
+-   **SQLModel / SQLAlchemy**
+-   **PostgreSQL**
+-   **Pytest**
+-   **Ruff**
+-   **Uv**
 -   **Docker & Docker Compose**
 
 ------------------------------------------------------------------------

@@ -203,15 +203,23 @@ class TransactionService(Service[Transaction]):
 
     def delete_transaction_safe(self, transaction_id: int, user_id: int):
         transaction = self._get_owned_transaction(transaction_id, user_id)
-        
+
         if transaction.type == TransactionType.INCOME:
             # We need to remove money
-            self.account_service.update_balance(transaction.source_account, -transaction.amount)
+            self.account_service.update_balance(
+                transaction.source_account, -transaction.amount
+            )
         elif transaction.type == TransactionType.EXPENSE:
             # We need to add money
-            self.account_service.update_balance(transaction.source_account, transaction.amount)
+            self.account_service.update_balance(
+                transaction.source_account, transaction.amount
+            )
         elif transaction.type == TransactionType.TRANSFER:
-            self.account_service.update_balance(transaction.source_account, transaction.amount)
-            self.account_service.update_balance(transaction.destination_account, -transaction.amount)            
-        
+            self.account_service.update_balance(
+                transaction.source_account, transaction.amount
+            )
+            self.account_service.update_balance(
+                transaction.destination_account, -transaction.amount
+            )
+
         return self.delete(transaction)

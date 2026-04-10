@@ -39,7 +39,9 @@ def default_user():
 @pytest.fixture
 def account_factory():
     def _make_account(user_id: int, balance: int = 1000):
-        temp_account = AccountCreateTest(name="MercadoPago", balance=balance, user_id = user_id)
+        temp_account = AccountCreateTest(
+            name="MercadoPago", balance=balance, user_id=user_id
+        )
         return temp_account
 
     return _make_account

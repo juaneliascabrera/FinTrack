@@ -40,10 +40,12 @@ class AccountCreate(AccountBase):
     name: str
     balance: int
 
+
 class AccountCreateTest(AccountBase):
     name: str
     balance: int
     user_id: int
+
 
 class AccountUpdate(AccountBase):
     name: str | None = None
@@ -56,8 +58,7 @@ class TransactionBase(BaseModel):
     description: str | None = None
     category: str | None = None
     type: TransactionType
-    
-    
+
 
 class TransactionCreate(TransactionBase):
     source_account: int

@@ -71,5 +71,5 @@ dist/
 dist-ssr/
 *.local
 
-# --- Vite ---
+
 .eslintc

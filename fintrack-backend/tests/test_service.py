@@ -77,7 +77,7 @@ def test_can_create_account(session, default_user, account_factory):
 def test_list_all_works(session, default_user):
     user_service = UserService(session)
     assert len(user_service.list_all()) == 0
-    created_user = user_service.create(default_user)
+    user_service.create(default_user)
 
     assert len(user_service.list_all()) == 1
 
@@ -114,14 +114,14 @@ def test_creating_account_with_invalid_user_id_raises_integrity_error(
     new_account = account_factory(user_id=999, balance=1000)
 
     with pytest.raises(IntegrityError):
-        created_account = account_service.create(new_account)
+        account_service.create(new_account)
     session.rollback()
     # Post-asserts
     assert len(created_user.accounts) == 0
 
 
 def test_can_delete_user_if_has_no_accounts(session, default_user):
-    account_service = AccountService(session)
+    AccountService(session)
     user_service = UserService(session)
 
     created_user = user_service.create(default_user)

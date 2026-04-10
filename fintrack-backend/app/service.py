@@ -201,7 +201,20 @@ class TransactionService(Service[Transaction]):
         return self._save(db_transaction)
 
     def delete_transaction_safe(self, transaction_id: int, user_id: int):
-        #WE NEED TO UPDATE THE BALANCE!
+        transaction = self.get_by_id(transaction_id)
+        source_account = self.account_service.get_by_id(transaction.source_account)
+        if not source_account or source_account.user_id != user_id:
+            raise ForbiddenError()
+        if transaction.type == TransactionType.INCOME:
+            # We need to remove money
+            self.account_service.update_balance(transaction.source_account, -transaction.amount)
+        elif transaction.type == TransactionType.EXPENSE:
+            # We need to add money
+            self.account_service.update_balance(transaction.source_account, transaction.amount)
+        elif transaction.type == TransactionType.TRANSFER:
+            self.account_service.update_balance(transaction.transaction.source_account, transaction.amount)
+            self.account_service.update_balance(transaction.destination_account, -transaction.amount)            
+        
         transaction_obj = self._get_owned_transaction(transaction_id, user_id)
         if transaction_obj is None:
             raise NotExistsError()

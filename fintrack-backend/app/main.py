@@ -137,7 +137,7 @@ def login(
 ):
     # Trying to authenticate
     user = service.authenticate_user(form_data.username, form_data.password)
-    # If it was correct
+    # If it was correctch
     access_token = create_access_token(data={"sub": user.email})
 
     # Returning token

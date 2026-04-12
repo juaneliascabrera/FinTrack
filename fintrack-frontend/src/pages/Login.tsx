@@ -20,7 +20,7 @@ export default function Login() {
 
         try {
             const data = await login(formData);
-            localStorage.setItem('token', data.access_token);
+            await localStorage.setItem('token', data.access_token);
             navigate('/home');
         }
         catch (err: any) {

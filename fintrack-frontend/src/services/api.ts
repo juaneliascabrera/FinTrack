@@ -4,7 +4,7 @@ const api = axios.create({
     baseURL: 'http://localhost:8000'
 });
 
-// Interceptor para inyectar el token en cada petición automáticamente
+// Interceptor for add the token everywhere.
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -15,5 +15,25 @@ api.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-export default api;
+// Interceptor for handling token expiration (401 errors)
+api.interceptors.response.use(
+    (response) => {
+        // If the request succeeds, just return the response
+        return response;
+    },
+    (error) => {
+        // If the server returns 401 Unauthorized, the token is likely expired or invalid
+        if (error.response && error.response.status === 401) {
+            console.warn("Session expired or invalid. Redirecting to login...");
+            
+            // 1. Clear the token
+            localStorage.removeItem('token');
+            
+            // 2. Redirect to login (force reload to clear any sensitive state)
+            window.location.href = '/login';
+        }
+        return Promise.reject(error);
+    }
+);
 
+export default api;

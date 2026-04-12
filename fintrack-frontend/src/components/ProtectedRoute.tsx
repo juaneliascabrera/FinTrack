@@ -1,10 +1,11 @@
 import { Navigate } from 'react-router-dom';
-
+import { get_user_name } from '../services/auth';
 interface ProtectedRouteProps {
     children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+    const isValidSession = get_user_name();
     const token = localStorage.getItem('token');
 
     // If there's no token, we'll go to the login

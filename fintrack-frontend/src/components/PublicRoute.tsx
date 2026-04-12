@@ -7,12 +7,12 @@ interface PublicRouteProps {
 const PublicRoute = ({ children }: PublicRouteProps) => {
     const token = localStorage.getItem('token');
 
-    // Si ya hay token, no lo dejamos estar en login/registro, lo mandamos al home
+    // If there's token, we can't be in PublicRoute
     if (token) {
         return <Navigate to="/home" replace />;
     }
 
-    // Si no hay token, dejamos que vea la página pública
+    // But if there's not, then we render here.
     return <>{children}</>;
 };
 

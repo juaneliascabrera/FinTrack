@@ -9,31 +9,26 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Raíz: Redirigimos al home, y el protector decidirá si lo manda al login */}
+        {/* We should not access home if we're logged.*/}
         <Route path="/" element={<Navigate to="/home" />} />
-        
-        {/* Login: Solo accesible si NO estás logueado */}
-        <Route 
-          path="/login" 
+        <Route
+          path="/login"
           element={
             <PublicRoute>
               <Login />
             </PublicRoute>
-          } 
+          }
         />
-        
-        {/* Home: Solo accesible si ESTÁS logueado */}
-        <Route 
-          path="/home" 
+
+        {/* We can access home if and only if we're logged*/}
+        <Route
+          path="/home"
           element={
             <ProtectedRoute>
               <Home />
             </ProtectedRoute>
-          } 
+          }
         />
-
-        {/* Catch-all: Cualquier otra ruta manda al home */}
-        <Route path="*" element={<Navigate to="/home" />} />
       </Routes>
     </Router>
   );

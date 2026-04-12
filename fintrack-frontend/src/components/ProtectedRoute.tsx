@@ -7,12 +7,12 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     const token = localStorage.getItem('token');
 
-    // Si no hay token, lo mandamos al login
+    // If there's no token, we'll go to the login
     if (!token) {
         return <Navigate to="/login" replace />;
     }
 
-    // Si hay token, dejamos que vea la página
+    // If there's token, we'll render the page.
     return <>{children}</>;
 };
 

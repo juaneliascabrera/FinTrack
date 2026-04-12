@@ -17,3 +17,8 @@ export async function login(data: LoginRequest) {
     const response = await api.post("/auth/login", formData);
     return response.data;
 }
+
+export async function get_user_name() {
+    const user = await api.get("users/me");
+    return user.data.name;
+}

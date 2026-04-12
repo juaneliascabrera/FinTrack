@@ -166,6 +166,10 @@ def create_user(data: UserCreate, service: UserService = Depends(get_user_servic
     return service.create(data)
 
 
+@app.get("/users/me", response_model = UserPublic)
+def list_myself(current_user: User = Depends(get_current_user)):
+    return current_user
+
 @app.get("/users", response_model=list[UserPublic])
 def list_users(service: UserService = Depends(get_user_service)):
     return service.list_all()

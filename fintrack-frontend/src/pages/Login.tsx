@@ -1,13 +1,15 @@
-import { login, type LoginRequest } from '../services/auth';
+import { login, get_user_name, type LoginRequest } from '../services/auth';
 import { useState, Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
-    // First we'll define the state for both email and password.
+    const { loginSession } = useAuth();
+
     const [formData, setFormData] = useState<LoginRequest>({ username: '', password: '' });
     const [error, setError] = useState("");
-    // We need an isLogging state to avoid double submits.
     const [isLogging, setIsLogging] = useState(false);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     }
@@ -15,12 +17,19 @@ export default function Login() {
     const navigate = useNavigate();
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
         setIsLogging(true);
 
         try {
             const data = await login(formData);
-            await localStorage.setItem('token', data.access_token);
+            localStorage.setItem('token', data.access_token);
+
+            // We get the name for the cloud
+            const fetchedName = await get_user_name();
+
+            // Then we upload it
+            loginSession(fetchedName);
+
+            // Navigate
             navigate('/home');
         }
         catch (err: any) {

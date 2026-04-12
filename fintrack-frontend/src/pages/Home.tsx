@@ -1,4 +1,12 @@
-export default function Home() {
+import { useAuth } from '../context/AuthContext';
 
-    return <h1>Hola</h1>
+export default function Home() {
+    const { user, logoutSession } = useAuth();
+
+    return (
+        <div>
+            <h1>Hi, {user}</h1>
+            <button onClick={logoutSession}>Log Out</button>
+        </div>
+    );
 }

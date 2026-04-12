@@ -1,18 +1,24 @@
 import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface PublicRouteProps {
     children: React.ReactNode;
 }
 
 const PublicRoute = ({ children }: PublicRouteProps) => {
+    const { user, isLoading } = useAuth();
     const token = localStorage.getItem('token');
 
-    // If there's token, we can't be in PublicRoute
-    if (token) {
+    if (isLoading) {
+        return <div className="loading-screen">Verificando sesión...</div>;
+    }
+
+
+    if (user || token) {
         return <Navigate to="/home" replace />;
     }
 
-    // But if there's not, then we render here.
+
     return <>{children}</>;
 };
 

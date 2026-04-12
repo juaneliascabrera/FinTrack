@@ -1,19 +1,36 @@
 import { Navigate } from 'react-router-dom';
 import { get_user_name } from '../services/auth';
+import { useState, useEffect } from 'react';
+
 interface ProtectedRouteProps {
     children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-    const isValidSession = get_user_name();
-    const token = localStorage.getItem('token');
+    const [tokenExists, setTokenExists] = useState(!!localStorage.getItem('token'));
 
-    // If there's no token, we'll go to the login
-    if (!token) {
+    useEffect(() => {
+        const verifySession = async () => {
+            if (!tokenExists) {
+                return;
+            }
+
+            try {
+                await get_user_name();
+
+            } catch (error) {
+                console.error("Session verification failed", error);
+                setTokenExists(false);
+
+            }
+        };
+
+        verifySession();
+    }, [tokenExists]);
+
+    if (!tokenExists) {
         return <Navigate to="/login" replace />;
     }
-
-    // If there's token, we'll render the page.
     return <>{children}</>;
 };
 

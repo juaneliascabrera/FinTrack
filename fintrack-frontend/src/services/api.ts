@@ -23,14 +23,19 @@ api.interceptors.response.use(
     },
     (error) => {
         // If the server returns 401 Unauthorized, the token is likely expired or invalid
+        // BUT we should avoid redirecting if the error comes from the login request itself
         if (error.response && error.response.status === 401) {
-            console.warn("Session expired or invalid. Redirecting to login...");
+            const isLoginRequest = error.config.url.includes('/auth/login');
             
-            // 1. Clear the token
-            localStorage.removeItem('token');
-            
-            // 2. Redirect to login (force reload to clear any sensitive state)
-            window.location.href = '/login';
+            if (!isLoginRequest) {
+                console.warn("Session expired or invalid. Redirecting to login...");
+                
+                // 1. Clear the token
+                localStorage.removeItem('token');
+                
+                // 2. Redirect to login (force reload to clear any sensitive state)
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }

@@ -9,4 +9,6 @@ export default function Home() {
             <button onClick={logoutSession}>Log Out</button>
         </div>
     );
+    // Now I want to show user-relevant endpoints such as list and create accounts.
+
 }

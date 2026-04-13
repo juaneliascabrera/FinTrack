@@ -1,5 +1,5 @@
 import { useState } from 'react';
-//import { createAccount } from '../services/accounts';
+import { createAccount } from '../services/accounts';
 
 interface Props {
     isOpen: boolean;
@@ -8,7 +8,7 @@ interface Props {
 
 export default function CreateAccountModal({ isOpen, onClose }: Props) {
     const [name, setName] = useState('');
-    const [balance, setBalance] = useState('');
+    const [balance, setBalance] = useState(0);
     const [isSaving, setIsSaving] = useState(false);
 
     if (!isOpen) return null; // If it's not open, it should not render anything.
@@ -17,9 +17,9 @@ export default function CreateAccountModal({ isOpen, onClose }: Props) {
         e.preventDefault();
         setIsSaving(true);
         try {
-            //          await createAccount({ name, balance });
+            await createAccount({ name, balance });
             setName('');
-            setBalance('');
+            setBalance(0);
             onClose(); // We ended
             alert("Cuenta creada!");
         } catch (error) {
@@ -41,9 +41,10 @@ export default function CreateAccountModal({ isOpen, onClose }: Props) {
                         required
                     />
                     <input
+                        type='number'
                         placeholder="Balance"
                         value={balance}
-                        onChange={e => setBalance(e.target.value)}
+                        onChange={e => setBalance(Number(e.target.value))}
                     />
                     <button type="submit" disabled={isSaving}>Create</button>
                     <button type="button" onClick={onClose}>Close</button>

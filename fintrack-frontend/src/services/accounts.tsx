@@ -9,3 +9,8 @@ export async function createAccount(data: CreateAccountRequest) {
     const response = await api.post("/accounts", data);
     return response.data;
 }
+
+export async function listAccounts() {
+    const response = await api.get("/accounts");
+    return response.data;
+}

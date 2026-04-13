@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Home from './pages/Home';
+import Accounts from './pages/Accounts'
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import { AuthProvider } from './context/AuthContext';
@@ -31,6 +32,20 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/*Accounts*/}
+          <Route
+            path="/accounts"
+            element={
+              <ProtectedRoute>
+                <Accounts />
+              </ProtectedRoute>
+            }
+          />
+
+
+
+
         </Routes>
       </Router>
     </AuthProvider>

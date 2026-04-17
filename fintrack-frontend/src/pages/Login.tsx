@@ -1,7 +1,8 @@
 import { login, get_user_name, type LoginRequest } from '../services/auth';
-import { useState, Fragment } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import './Login.css';
 
 export default function Login() {
     const { loginSession } = useAuth();
@@ -18,6 +19,7 @@ export default function Login() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsLogging(true);
+        setError("");
 
         try {
             const data = await login(formData);
@@ -39,25 +41,52 @@ export default function Login() {
             setIsLogging(false);
         }
     };
-    return (
-        <Fragment>
-            <h1>Log In</h1>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="email"
-                    placeholder='Email'
-                    onChange={handleChange}
-                    name='username'
-                />
-                <input
-                    type="password"
-                    placeholder='Password'
-                    name='password'
-                    onChange={handleChange} />
 
-                <button type="submit" disabled={isLogging}>{isLogging ? "Signing in..." : "LogIn"}</button>
-                {error && <p>{error}</p>}
-            </form>
-        </Fragment>
+    return (
+        <div className="login-page">
+            <div className="login-card">
+                <div className="login-brand">
+                    <div className="login-brand-icon">💰</div>
+                    <h1>FinTrack</h1>
+                    <p>Sign in to manage your finances</p>
+                </div>
+
+                <form className="login-form" onSubmit={handleSubmit}>
+                    {error && <div className="login-error">{error}</div>}
+
+                    <div className="form-group">
+                        <label className="form-label">Email</label>
+                        <input
+                            className="form-input"
+                            type="email"
+                            placeholder="you@example.com"
+                            onChange={handleChange}
+                            name="username"
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="form-label">Password</label>
+                        <input
+                            className="form-input"
+                            type="password"
+                            placeholder="••••••••"
+                            name="password"
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <button
+                        className="btn btn-primary login-btn"
+                        type="submit"
+                        disabled={isLogging}
+                    >
+                        {isLogging ? "Signing in..." : "Sign In"}
+                    </button>
+                </form>
+            </div>
+        </div>
     );
 }

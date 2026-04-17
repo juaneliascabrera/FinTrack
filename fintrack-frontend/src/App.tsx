@@ -5,7 +5,6 @@ import Accounts from './pages/Accounts'
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import { AuthProvider } from './context/AuthContext';
-import './App.css';
 
 function App() {
   return (

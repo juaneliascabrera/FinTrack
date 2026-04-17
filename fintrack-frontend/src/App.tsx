@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Accounts from './pages/Accounts'
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
+import DashboardLayout from './components/DashboardLayout';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -11,7 +12,6 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          {/* We should not access home if we're logged.*/}
           <Route path="/" element={<Navigate to="/home" />} />
           <Route
             path="/login"
@@ -22,29 +22,28 @@ function App() {
             }
           />
 
-          {/* We can access home if and only if we're logged*/}
+          {/* Protected pages wrapped in dashboard layout */}
           <Route
             path="/home"
             element={
               <ProtectedRoute>
-                <Home />
+                <DashboardLayout>
+                  <Home />
+                </DashboardLayout>
               </ProtectedRoute>
             }
           />
 
-          {/*Accounts*/}
           <Route
             path="/accounts"
             element={
               <ProtectedRoute>
-                <Accounts />
+                <DashboardLayout>
+                  <Accounts />
+                </DashboardLayout>
               </ProtectedRoute>
             }
           />
-
-
-
-
         </Routes>
       </Router>
     </AuthProvider>

@@ -1,8 +1,7 @@
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { listAccounts, deleteAccount } from '../services/accounts';
-import { useEffect, useState } from 'react';
-import CreateTransactionModal from '../components/CreateTransactionModal';
+import { useEffect, useState, useCallback } from 'react';
+import CreateAccountModal from '../components/CreateAccountModal';
+import './Accounts.css';
 
 export interface Account {
     id: number;
@@ -12,25 +11,34 @@ export interface Account {
 }
 
 export default function Accounts() {
-    const [accounts, setAccounts] = useState<Account[]>([])
-    const [showTxModal, setShowTxModal] = useState(false);
-    const navigate = useNavigate();
+    const [accounts, setAccounts] = useState<Account[]>([]);
+    const [showModal, setShowModal] = useState(false);
 
-    const fetchAccounts = async () => {
+    const fetchAccounts = useCallback(async () => {
         const data = await listAccounts();
         setAccounts(data);
-    };
+    }, []);
 
     useEffect(() => {
         fetchAccounts();
-    }, []);
+
+        const handler = () => fetchAccounts();
+        window.addEventListener('transaction-created', handler);
+        return () => window.removeEventListener('transaction-created', handler);
+    }, [fetchAccounts]);
+
+    const formatCurrency = (value: number) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+        }).format(value);
+    };
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm("Are you sure?")) return;
+        if (!window.confirm("Are you sure you want to delete this account?")) return;
 
         try {
             await deleteAccount(id);
-
             await fetchAccounts();
         } catch (error: any) {
             alert(error.response?.data?.detail || "Error. Can't delete account");
@@ -38,32 +46,44 @@ export default function Accounts() {
     };
 
     return (
-        <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h1>Hi there! These are your accounts:</h1>
-                <button onClick={() => setShowTxModal(true)} style={{ backgroundColor: '#2ecc71', color: 'white', padding: '10px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                    + New Transaction
-                </button>
+        <div className="accounts-page">
+            <div className="accounts-header">
+                <h2>Your Accounts</h2>
             </div>
-            <ul>
-                {accounts.map(acc => (
-                    <li key={acc.id} style={{ marginBottom: '10px' }}>
-                        {acc.name} - Balance: ${acc.balance}
-                        <button
-                            onClick={() => handleDelete(acc.id)}
-                            style={{ marginLeft: '15px', color: 'white', backgroundColor: 'red', border: 'none', padding: '5px 10px', cursor: 'pointer', borderRadius: '4px' }}
-                        >
-                            Delete
-                        </button>
-                    </li>
-                ))}
-            </ul>
-            <button onClick={() => navigate('../home')}>Home</button>
 
-            <CreateTransactionModal
-                isOpen={showTxModal}
-                onClose={() => setShowTxModal(false)}
-                onSuccess={fetchAccounts} // Recargar los saldos de las cuentas
+            <div className="accounts-grid">
+                {accounts.map(acc => (
+                    <div key={acc.id} className="account-card">
+                        <div className="account-card-header">
+                            <div className="account-card-icon">🏦</div>
+                            <span className="account-card-name">{acc.name}</span>
+                        </div>
+                        <div>
+                            <div className="account-card-balance-label">Balance</div>
+                            <div className="account-card-balance">{formatCurrency(acc.balance)}</div>
+                        </div>
+                        <div className="account-card-actions">
+                            <button
+                                className="btn btn-danger btn-sm"
+                                onClick={() => handleDelete(acc.id)}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                ))}
+
+                {/* Add Account card */}
+                <div className="add-account-card" onClick={() => setShowModal(true)}>
+                    <span className="add-account-icon">+</span>
+                    <span className="add-account-text">New Account</span>
+                </div>
+            </div>
+
+            <CreateAccountModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onSuccess={fetchAccounts}
             />
         </div>
     );

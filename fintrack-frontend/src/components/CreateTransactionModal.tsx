@@ -6,12 +6,12 @@ import { type Account } from '../pages/Accounts';
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess: () => void; // To reload account list in parent
+    onSuccess: () => void;
 }
 
 export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: Props) {
     const [accounts, setAccounts] = useState<Account[]>([]);
-    
+
     // Form fields
     const [type, setType] = useState<'income' | 'expense' | 'transfer'>('expense');
     const [amount, setAmount] = useState<number | ''>('');
@@ -30,7 +30,7 @@ export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: P
                     const data = await listAccounts();
                     setAccounts(data);
                     if (data.length > 0) {
-                        setSourceAccount(data[0].id); // Pre-select first account
+                        setSourceAccount(data[0].id);
                     }
                 } catch (error) {
                     console.error("Could not load accounts", error);
@@ -44,7 +44,7 @@ export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: P
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Basic validations
         if (!amount || amount <= 0) {
             alert("Amount must be greater than 0");
@@ -78,15 +78,14 @@ export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: P
             }
 
             await createTransaction(payload);
-            
+
             // Clear form and close
             setAmount('');
             setDescription('');
             setCategory('');
             setDestinationAccount('');
-            onSuccess(); // Notify parent to reload data
+            onSuccess();
             onClose();
-            alert("Transaction registered!");
 
         } catch (error: any) {
             alert(error.response?.data?.detail || "Error creating transaction.");
@@ -96,41 +95,47 @@ export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: P
     };
 
     return (
-        <div className='modal-overlay'>
-            <div className='modal-content'>
+        <div className="modal-overlay">
+            <div className="modal-content">
                 <h2>New Transaction</h2>
                 <form onSubmit={handleSubmit}>
-                    
-                    <div style={{ marginBottom: '10px' }}>
-                        <label>Type:</label>
-                        <select value={type} onChange={e => setType(e.target.value as any)} style={{ width: '100%', padding: '5px' }}>
+
+                    <div className="form-group">
+                        <label className="form-label">Type</label>
+                        <select
+                            className="form-select"
+                            value={type}
+                            onChange={e => setType(e.target.value as any)}
+                        >
                             <option value="expense">Expense</option>
                             <option value="income">Income</option>
                             <option value="transfer">Transfer</option>
                         </select>
                     </div>
 
-                    <div style={{ marginBottom: '10px' }}>
-                        <label>Amount ($):</label>
+                    <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                        <label className="form-label">Amount ($)</label>
                         <input
-                            type='number'
+                            className="form-input"
+                            type="number"
                             placeholder="0.00"
                             value={amount}
                             onChange={e => setAmount(Number(e.target.value))}
                             required
                             min="0.01"
                             step="0.01"
-                            style={{ width: '100%', padding: '5px' }}
                         />
                     </div>
 
-                    <div style={{ marginBottom: '10px' }}>
-                        <label>Account {type === 'transfer' ? '(Source)' : ''}:</label>
-                        <select 
-                            value={sourceAccount} 
+                    <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                        <label className="form-label">
+                            Account {type === 'transfer' ? '(Source)' : ''}
+                        </label>
+                        <select
+                            className="form-select"
+                            value={sourceAccount}
                             onChange={e => setSourceAccount(Number(e.target.value))}
                             required
-                            style={{ width: '100%', padding: '5px' }}
                         >
                             <option value="" disabled>Select an account</option>
                             {accounts.map(acc => (
@@ -140,13 +145,13 @@ export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: P
                     </div>
 
                     {type === 'transfer' && (
-                        <div style={{ marginBottom: '10px' }}>
-                            <label>Destination Account:</label>
-                            <select 
-                                value={destinationAccount} 
+                        <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                            <label className="form-label">Destination Account</label>
+                            <select
+                                className="form-select"
+                                value={destinationAccount}
                                 onChange={e => setDestinationAccount(Number(e.target.value))}
                                 required
-                                style={{ width: '100%', padding: '5px' }}
                             >
                                 <option value="" disabled>Select destination account</option>
                                 {accounts.map(acc => (
@@ -156,32 +161,36 @@ export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: P
                         </div>
                     )}
 
-                    <div style={{ marginBottom: '10px' }}>
-                        <label>Category (Optional):</label>
+                    <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                        <label className="form-label">Category (Optional)</label>
                         <input
-                            type='text'
+                            className="form-input"
+                            type="text"
                             placeholder="e.g. Food, Salary..."
                             value={category}
                             onChange={e => setCategory(e.target.value)}
-                            style={{ width: '100%', padding: '5px' }}
                         />
                     </div>
 
-                    <div style={{ marginBottom: '15px' }}>
-                        <label>Description (Optional):</label>
+                    <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                        <label className="form-label">Description (Optional)</label>
                         <input
-                            type='text'
+                            className="form-input"
+                            type="text"
                             placeholder="Details..."
                             value={description}
                             onChange={e => setDescription(e.target.value)}
-                            style={{ width: '100%', padding: '5px' }}
                         />
                     </div>
 
-                    <button type="submit" disabled={isSaving} style={{ marginRight: '10px' }}>
-                        {isSaving ? "Processing..." : "Register"}
-                    </button>
-                    <button type="button" onClick={onClose}>Cancel</button>
+                    <div className="modal-actions">
+                        <button className="btn btn-primary" type="submit" disabled={isSaving}>
+                            {isSaving ? "Processing..." : "Register"}
+                        </button>
+                        <button className="btn btn-ghost" type="button" onClick={onClose}>
+                            Cancel
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

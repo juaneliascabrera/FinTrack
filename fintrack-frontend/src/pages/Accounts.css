@@ -1,0 +1,131 @@
+/* ===================================
+   Accounts Page
+   =================================== */
+
+.accounts-page {
+  animation: slideUp var(--transition-base);
+}
+
+.accounts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+}
+
+.accounts-header h2 {
+  margin: 0;
+}
+
+/* --- Account Grid --- */
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-md);
+}
+
+.account-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.account-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-input);
+  transform: translateY(-2px);
+}
+
+.account-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.account-card-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--primary-glow);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.account-card-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.account-card-balance-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.account-card-balance {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.account-card-actions {
+  margin-top: auto;
+  display: flex;
+  gap: var(--space-sm);
+}
+
+/* --- Add Account Card --- */
+.add-account-card {
+  background: transparent;
+  border: 2px dashed var(--border-input);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  min-height: 180px;
+  color: var(--text-muted);
+}
+
+.add-account-card:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.add-account-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.add-account-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .accounts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .accounts-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+}

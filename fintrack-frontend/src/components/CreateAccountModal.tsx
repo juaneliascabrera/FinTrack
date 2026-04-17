@@ -4,14 +4,15 @@ import { createAccount } from '../services/accounts';
 interface Props {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess: () => void;
 }
 
-export default function CreateAccountModal({ isOpen, onClose }: Props) {
+export default function CreateAccountModal({ isOpen, onClose, onSuccess }: Props) {
     const [name, setName] = useState('');
     const [balance, setBalance] = useState(0);
     const [isSaving, setIsSaving] = useState(false);
 
-    if (!isOpen) return null; // If it's not open, it should not render anything.
+    if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -20,34 +21,49 @@ export default function CreateAccountModal({ isOpen, onClose }: Props) {
             await createAccount({ name, balance });
             setName('');
             setBalance(0);
-            onClose(); // We ended
-            alert("Cuenta creada!");
+            onSuccess();
+            onClose();
         } catch (error) {
-            alert("Error al crear");
+            alert("Error creating account");
         } finally {
             setIsSaving(false);
         }
     };
 
     return (
-        <div className='modal-overlay'>
-            <div className='modal-content'>
+        <div className="modal-overlay">
+            <div className="modal-content">
                 <h2>New Account</h2>
                 <form onSubmit={handleSubmit}>
-                    <input
-                        placeholder="Account Name"
-                        value={name}
-                        onChange={e => setName(e.target.value)}
-                        required
-                    />
-                    <input
-                        type='number'
-                        placeholder="Balance"
-                        value={balance}
-                        onChange={e => setBalance(Number(e.target.value))}
-                    />
-                    <button type="submit" disabled={isSaving}>Create</button>
-                    <button type="button" onClick={onClose}>Close</button>
+                    <div className="form-group">
+                        <label className="form-label">Account Name</label>
+                        <input
+                            className="form-input"
+                            placeholder="e.g. Savings, Checking..."
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                        <label className="form-label">Initial Balance</label>
+                        <input
+                            className="form-input"
+                            type="number"
+                            placeholder="0.00"
+                            value={balance}
+                            onChange={e => setBalance(Number(e.target.value))}
+                            step="0.01"
+                        />
+                    </div>
+                    <div className="modal-actions">
+                        <button className="btn btn-primary" type="submit" disabled={isSaving}>
+                            {isSaving ? "Creating..." : "Create"}
+                        </button>
+                        <button className="btn btn-ghost" type="button" onClick={onClose}>
+                            Cancel
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

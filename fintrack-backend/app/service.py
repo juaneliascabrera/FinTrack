@@ -239,3 +239,19 @@ class TransactionService(Service[Transaction]):
             (Transaction.destination_account == account_id)
         ).order_by(Transaction.timestamp.desc())
         return self.session.exec(statement).all()
+
+    def list_all_transactions_of_user(self, user_id: int, limit: int = 50, offset: int = 0):
+        # Obtain all account IDs of the user, whether active or soft-deleted
+        statement = select(Account.id).where(Account.user_id == user_id)
+        account_ids = self.session.exec(statement).all()
+        
+        if not account_ids:
+            return []
+            
+        # Match transactions from those accounts
+        statement = select(Transaction).where(
+            (Transaction.source_account.in_(account_ids)) |
+            (Transaction.destination_account.in_(account_ids))
+        ).order_by(Transaction.timestamp.desc()).offset(offset).limit(limit)
+        
+        return self.session.exec(statement).all()

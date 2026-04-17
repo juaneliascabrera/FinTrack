@@ -246,6 +246,16 @@ def list_transactions_from_account(
     current_user = Depends(get_current_user)):
     return service.list_transactions_from_account(account_id, current_user.id)
 
+@app.get("/transactions", response_model=list[TransactionPublic])
+def list_transactions(
+    limit: int = 50,
+    offset: int = 0,
+    service: TransactionService = Depends(get_transaction_service),
+    current_user: User = Depends(get_current_user),
+):
+    return service.list_all_transactions_of_user(current_user.id, limit=limit, offset=offset)
+
+
 @app.post("/transactions", response_model=TransactionPublic, status_code=201)
 def create_transaction(
     data: TransactionCreate,

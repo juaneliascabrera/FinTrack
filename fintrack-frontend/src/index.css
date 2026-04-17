@@ -303,6 +303,10 @@ p {
   margin-bottom: var(--space-lg);
 }
 
+.modal-content .form-group + .form-group {
+  margin-top: var(--space-md);
+}
+
 .modal-actions {
   display: flex;
   gap: var(--space-sm);

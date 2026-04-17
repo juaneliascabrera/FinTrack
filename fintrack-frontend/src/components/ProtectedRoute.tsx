@@ -13,13 +13,17 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         return <Navigate to="/login" replace />;
     }
     if (isLoading) {
-        return <div className="loading-screen">Verificando sesión...</div>;
+        return (
+            <div className="loading-screen">
+                <div className="spinner"></div>
+                <span>Verifying session...</span>
+            </div>
+        );
     }
 
     if (!user) {
         return <Navigate to="/login" replace />;
     }
-
 
     return <>{children}</>;
 };

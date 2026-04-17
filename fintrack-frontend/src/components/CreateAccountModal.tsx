@@ -45,7 +45,7 @@ export default function CreateAccountModal({ isOpen, onClose, onSuccess }: Props
                             required
                         />
                     </div>
-                    <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                    <div className="form-group">
                         <label className="form-label">Initial Balance</label>
                         <input
                             className="form-input"

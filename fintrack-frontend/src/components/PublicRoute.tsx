@@ -10,14 +10,17 @@ const PublicRoute = ({ children }: PublicRouteProps) => {
     const token = localStorage.getItem('token');
 
     if (isLoading) {
-        return <div className="loading-screen">Verificando sesión...</div>;
+        return (
+            <div className="loading-screen">
+                <div className="spinner"></div>
+                <span>Loading...</span>
+            </div>
+        );
     }
-
 
     if (user || token) {
         return <Navigate to="/home" replace />;
     }
-
 
     return <>{children}</>;
 };

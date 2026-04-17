@@ -113,7 +113,7 @@ export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: P
                         </select>
                     </div>
 
-                    <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                    <div className="form-group">
                         <label className="form-label">Amount ($)</label>
                         <input
                             className="form-input"
@@ -127,7 +127,7 @@ export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: P
                         />
                     </div>
 
-                    <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                    <div className="form-group">
                         <label className="form-label">
                             Account {type === 'transfer' ? '(Source)' : ''}
                         </label>
@@ -145,7 +145,7 @@ export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: P
                     </div>
 
                     {type === 'transfer' && (
-                        <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                        <div className="form-group">
                             <label className="form-label">Destination Account</label>
                             <select
                                 className="form-select"
@@ -161,7 +161,7 @@ export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: P
                         </div>
                     )}
 
-                    <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                    <div className="form-group">
                         <label className="form-label">Category (Optional)</label>
                         <input
                             className="form-input"
@@ -172,7 +172,7 @@ export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: P
                         />
                     </div>
 
-                    <div className="form-group" style={{ marginTop: 'var(--space-md)' }}>
+                    <div className="form-group">
                         <label className="form-label">Description (Optional)</label>
                         <input
                             className="form-input"

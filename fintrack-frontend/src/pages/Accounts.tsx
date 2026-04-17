@@ -23,7 +23,7 @@ export default function Accounts() {
 
         try {
             await deleteAccount(id);
-            // Actualizar la lista tras borrar
+
             await fetchAccounts();
         } catch (error: any) {
             alert(error.response?.data?.detail || "Error. Can't delete account");
@@ -53,8 +53,8 @@ export default function Accounts() {
             </ul>
             <button onClick={() => navigate('../home')}>Home</button>
 
-            <CreateTransactionModal 
-                isOpen={showTxModal} 
+            <CreateTransactionModal
+                isOpen={showTxModal}
                 onClose={() => setShowTxModal(false)}
                 onSuccess={fetchAccounts} // Recargar los saldos de las cuentas
             />

@@ -34,18 +34,18 @@ class AccountBase(BaseModel):
 class AccountPublic(AccountBase):
     id: int
     name: str
-    balance: int
+    balance: float
     user_id: int
 
 
 class AccountCreate(AccountBase):
     name: str
-    balance: int
+    balance: float
 
 
 class AccountCreateTest(AccountBase):
     name: str
-    balance: int
+    balance: float
     user_id: int
 
 

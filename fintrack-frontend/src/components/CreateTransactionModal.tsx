@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createTransaction, type TransactionCreate } from '../services/transactions';
 import { listAccounts } from '../services/accounts';
+import { type Account } from '../pages/Accounts';
 
 interface Props {
     isOpen: boolean;
@@ -9,7 +10,7 @@ interface Props {
 }
 
 export default function CreateTransactionModal({ isOpen, onClose, onSuccess }: Props) {
-    const [accounts, setAccounts] = useState<any[]>([]);
+    const [accounts, setAccounts] = useState<Account[]>([]);
     
     // Form fields
     const [type, setType] = useState<'income' | 'expense' | 'transfer'>('expense');

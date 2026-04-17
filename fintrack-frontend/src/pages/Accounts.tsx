@@ -4,8 +4,15 @@ import { listAccounts, deleteAccount } from '../services/accounts';
 import { useEffect, useState } from 'react';
 import CreateTransactionModal from '../components/CreateTransactionModal';
 
+export interface Account {
+    id: number;
+    name: string;
+    balance: number;
+    user_id: number;
+}
+
 export default function Accounts() {
-    const [accounts, setAccounts] = useState<any[]>([])
+    const [accounts, setAccounts] = useState<Account[]>([])
     const [showTxModal, setShowTxModal] = useState(false);
     const navigate = useNavigate();
 

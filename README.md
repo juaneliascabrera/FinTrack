@@ -1,111 +1,192 @@
-# FinTrack API Backend
+# 💰 FinTrack
 
-FinTrack is a robust and modern API designed for personal financial
-tracking. It allows users to register, authenticate, create multiple
-accounts, and record financial transactions (Income, Expenses, and
-Transfers between accounts), all secured with JWT and built following
-solid architectural practices.
+**FinTrack** is a full-stack personal finance tracker built with **FastAPI** and **React**. It allows users to register, authenticate, manage multiple accounts, and record financial transactions (income, expenses, and transfers) — all through a modern dark-themed dashboard.
 
-## 🚀 Project Status
+![Dashboard Screenshot](fintrack-frontend/src/assets/hero.png)
 
-The project is in a **solid, development-ready state**. It correctly
-implements:
+---
 
--   **Layered Architecture:** Clear separation between controllers
-    (FastAPI), services (business logic and database access), and
-    models/schemas.\
--   **Strict Validation:** The combined use of Pydantic and SQLModel
-    enforces strong typing at both the API and database levels.\
--   **Security & Integrity:** Password hashing with bcrypt, built-in SQL
-    injection protection, and recursive ownership validation (a user
-    cannot manipulate another user's resources, whether by mistake or
-    intent).\
--   **Consistency:** Atomic database operations via *Dependency
-    Injection* and request-scoped session instances.\
--   **Clean & Modern Environment:** Ultra-fast dependency management
-    (via `uv`), containerized database, and comprehensive linting (via
-    `ruff`).
+## ✨ Features
 
-------------------------------------------------------------------------
+- **JWT Authentication** — Secure login with token-based sessions and automatic expiration handling.
+- **Multi-Account Management** — Create, list, and soft-delete financial accounts.
+- **Transactions** — Record income, expenses, and transfers between accounts with automatic balance updates.
+- **Dashboard** — Summary cards (total balance, income, expenses) and a recent transactions feed.
+- **Responsive UI** — Dark premium design with glassmorphism, sidebar navigation, and mobile support.
+- **Data Integrity** — Soft-delete accounts to preserve transaction history. Ownership validation on every operation.
 
-## 🛠️ Technologies Used
+---
 
--   **Python 3.13**
--   **FastAPI**
--   **SQLModel / SQLAlchemy**
--   **PostgreSQL**
--   **Pytest**
--   **Ruff**
--   **Uv**
--   **Docker & Docker Compose**
+## 🛠️ Tech Stack
 
-------------------------------------------------------------------------
+### Backend
+| Technology | Purpose |
+|---|---|
+| **Python 3.13** | Runtime |
+| **FastAPI** | REST API framework |
+| **SQLModel / SQLAlchemy** | ORM and database models |
+| **PostgreSQL** | Relational database |
+| **Pydantic** | Request/response validation |
+| **bcrypt + python-jose** | Password hashing and JWT |
+| **uv** | Dependency management |
+| **Ruff** | Linting and formatting |
+| **Pytest** | Testing |
+| **Docker Compose** | Containerized database |
+
+### Frontend
+| Technology | Purpose |
+|---|---|
+| **React 19** | UI library |
+| **TypeScript** | Type safety |
+| **Vite** | Build tool and dev server |
+| **React Router v7** | Client-side routing |
+| **Axios** | HTTP client with interceptors |
+| **Vanilla CSS** | Custom design system with variables |
+
+---
 
 ## 📂 Project Structure
 
-    proyecto-fintrack/
-    ├── fintrack-backend/
-    │   ├── app/
-    │   │   ├── main.py
-    │   │   ├── models.py
-    │   │   ├── schemas.py
-    │   │   ├── service.py
-    │   │   ├── security.py
-    │   │   ├── database.py
-    │   │   ├── config.py
-    │   │   └── exceptions.py
-    │   └── tests/
-    ├── pyproject.toml
-    ├── docker-compose.yml
-    ├── uv.lock
-    └── .env
+```
+proyecto-fintrack/
+├── fintrack-backend/
+│   ├── app/
+│   │   ├── main.py          # Routes and exception handlers
+│   │   ├── models.py         # SQLModel database models
+│   │   ├── schemas.py        # Pydantic request/response schemas
+│   │   ├── service.py        # Business logic layer
+│   │   ├── security.py       # JWT and password hashing
+│   │   ├── database.py       # Engine and session management
+│   │   ├── config.py         # Environment settings
+│   │   └── exceptions.py     # Custom domain exceptions
+│   └── tests/
+├── fintrack-frontend/
+│   ├── src/
+│   │   ├── components/       # DashboardLayout, Modals, Route guards
+│   │   ├── context/          # AuthContext (global auth state)
+│   │   ├── pages/            # Login, Home (Dashboard), Accounts
+│   │   └── services/         # API client, auth, accounts, transactions
+│   └── index.html
+├── docker-compose.yml
+├── pyproject.toml
+└── .env
+```
 
-------------------------------------------------------------------------
+---
 
-## ⚙️ Installation and Setup (Local)
+## ⚙️ Getting Started
 
-### 1. Environment Variables
+### Prerequisites
+- Python 3.13+
+- Node.js 18+
+- Docker & Docker Compose
+- [uv](https://docs.astral.sh/uv/) (Python package manager)
 
-``` ini
+### 1. Clone and configure
+
+```bash
+git clone <repo-url>
+cd proyecto-fintrack
+```
+
+Create a `.env` file in the project root:
+
+```ini
 DATABASE_URL=postgresql://postgres:postgres@localhost:5433/fintrack
 SECRET_KEY=your_very_secure_secret
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
 
-### 2. Dockerized Database
+### 2. Start the database
 
-``` bash
+```bash
 docker compose up -d
 ```
 
-### 3. Environment & Installation
+### 3. Install and run the backend
 
-``` bash
+```bash
 uv sync
+uv run uvicorn app.main:app --reload --app-dir fintrack-backend
 ```
 
-### 4. Run the Server
+The API will be available at `http://localhost:8000`. Interactive docs at `/docs`.
 
-``` bash
-source .venv/bin/activate
-uvicorn fintrack-backend.app.main:app --reload
+### 4. Install and run the frontend
+
+```bash
+cd fintrack-frontend
+npm install
+npm run dev
 ```
 
-------------------------------------------------------------------------
+The app will be available at `http://localhost:5173`.
 
-## 🧪 Testing and Linting
+---
 
-``` bash
-pytest fintrack-backend/tests
-ruff check .
-ruff format .
+## 🧪 Testing & Linting
+
+```bash
+# Run tests
+uv run pytest fintrack-backend/tests
+
+# Lint & format
+uv run ruff check .
+uv run ruff format .
+
+# TypeScript check
+cd fintrack-frontend && npx tsc --noEmit
 ```
 
-------------------------------------------------------------------------
+---
 
-## 📑 Domain Model
+## 📡 API Endpoints
 
--   **Users (`User`)**
--   **Accounts (`Account`)**
--   **Transactions (`Transaction`)**
+### Auth
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/auth/login` | Authenticate and receive JWT |
+
+### Users
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/users` | Register a new user |
+| `GET` | `/users/me` | Get current user info |
+| `PATCH` | `/users` | Update current user |
+| `DELETE` | `/users` | Delete current user |
+
+### Accounts
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/accounts` | Create a new account |
+| `GET` | `/accounts` | List user's active accounts |
+| `PATCH` | `/accounts/{id}` | Update account name |
+| `DELETE` | `/accounts/{id}` | Soft-delete an account |
+| `GET` | `/accounts/{id}/transactions` | List transactions for an account |
+
+### Transactions
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/transactions` | List all user transactions (paginated) |
+| `POST` | `/transactions` | Create a transaction |
+| `DELETE` | `/transactions/{id}` | Delete and reverse a transaction |
+
+---
+
+## 📐 Architecture
+
+```
+Client (React) → Axios Interceptors → FastAPI Routes → Service Layer → SQLModel → PostgreSQL
+```
+
+- **Routes** (`main.py`): Handle HTTP, authentication, and response serialization.
+- **Services** (`service.py`): Enforce business rules (ownership, balance checks, soft-delete).
+- **Models** (`models.py`): Define database schema with relationships and validators.
+- **Schemas** (`schemas.py`): Control what data enters and leaves the API.
+
+---
+
+## 📝 License
+
+This project is for educational and personal use.

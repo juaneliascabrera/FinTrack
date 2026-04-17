@@ -227,3 +227,15 @@ class TransactionService(Service[Transaction]):
             )
 
         return self.delete(transaction)
+    def list_transactions_from_account(self, account_id: int, user_id: int):
+        # First we should check ownership
+        account = self.account_service.get_by_id(account_id)
+        if not account or not user_id:
+            raise NotExistsError()
+        if account.user_id != user_id:
+            raise ForbiddenError()
+        statement = select(Transaction).where(
+            (Transaction.source_account == account_id) |
+            (Transaction.destination_account == account_id)
+        ).order_by(Transaction.timestamp.desc())
+        return self.session.exec(statement).all()

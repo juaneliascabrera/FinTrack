@@ -239,6 +239,12 @@ def delete_account(
     service.delete_account_safe(account_id, current_user.id)
     return Response(status_code=204)
 
+@app.get("/accounts/{account_id}/transactions", response_model=list[TransactionPublic])
+def list_transactions_from_account(
+    account_id: int,
+    service: TransactionService = Depends(get_transaction_service),
+    current_user = Depends(get_current_user)):
+    return service.list_transactions_from_account(account_id, current_user.id)
 
 @app.post("/transactions", response_model=TransactionPublic, status_code=201)
 def create_transaction(

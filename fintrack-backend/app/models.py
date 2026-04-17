@@ -19,6 +19,7 @@ class Account(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     name: str = Field(index=True)
     balance: float
+    is_active: bool = Field(default=True)
     user: "User" = Relationship(back_populates="accounts")
     user_id: int = Field(foreign_key="user.id", index=True)
 

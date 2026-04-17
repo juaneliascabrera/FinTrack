@@ -45,7 +45,9 @@ class Service(Generic[T]):
         return self.session.exec(instruction).all()
 
     def list_accounts_of(self, user_id: int):
-        instruction = select(Account).where(Account.user_id == user_id)
+        instruction = select(Account).where(
+            Account.user_id == user_id, Account.is_active == True
+        )
         results = self.session.exec(instruction)
         return results.all()
 
@@ -147,16 +149,8 @@ class AccountService(Service[Account]):
         if account_obj.balance != 0:
             raise CannotDeleteAccountWithBalance
             
-        # We must delete associated transactions to avoid ForeignKeyViolation
-        statement = select(Transaction).where(
-            (Transaction.source_account == account_id) | 
-            (Transaction.destination_account == account_id)
-        )
-        transactions = self.session.exec(statement).all()
-        for t in transactions:
-            self.session.delete(t)
-            
-        return self.delete(account_obj)
+        account_obj.is_active = False
+        return self._save(account_obj)
 
     def update_account_safe(self, account_id: int, data: AccountUpdate, user_id: int):
         account_obj = self._get_owned_account(account_id, user_id)

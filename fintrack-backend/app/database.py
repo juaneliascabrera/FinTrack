@@ -4,9 +4,13 @@ from sqlmodel import Session, SQLModel, create_engine
 from .config import settings
 
 # Engine configuration for PostgreSQL
+# Force SSL for serverless environments
+connect_args = {"sslmode": "require"}
+
 engine = create_engine(
     settings.DATABASE_URL,
     echo=True,
+    connect_args=connect_args,
 )
 
 

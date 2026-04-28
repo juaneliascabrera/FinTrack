@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlmodel import Session
 
+
 from .database import create_db_and_tables, get_session
 from .exceptions import (
     CannotDeleteAccountWithBalance,

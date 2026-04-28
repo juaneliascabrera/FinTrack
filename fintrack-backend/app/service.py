@@ -148,9 +148,7 @@ class AccountService(Service[Account]):
         account_obj = self._get_owned_account(account_id, user_id)
         if account_obj.balance != 0:
             raise CannotDeleteAccountWithBalance
-            
-        account_obj.is_active = False
-        return self._save(account_obj)
+        return self.delete(account_obj)
 
     def update_account_safe(self, account_id: int, data: AccountUpdate, user_id: int):
         account_obj = self._get_owned_account(account_id, user_id)
